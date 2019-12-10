@@ -36,7 +36,32 @@ class User():
         """
         to allow the user to change his password
         """
-        print("a")
+        try:
+            con = db()
+            with con:
+                cur = con.cursor()
+                sql = "SELECT * FROM users_app WHERE login=%s and password=aes_encrypt(%s, %s)";
+                cur.execute(sql, (login, pwd, SALT))
+
+                user = cur.fetchone()
+                if user is None:
+                    raise AuthenticationError
+                try:
+                    sql = "UPDATE users_app SET password=aes_encrypt(%s, %s) WHERE login=%s;"
+                    cur.execute(sql, (new_pwd, SALT, login))
+                    con.commit()
+                except Exception as e:
+                    raise e
+                    con.rollback()
+
+        except AuthenticationError:
+            response.status = 403
+            return { 'error': 'Authentication error' }
+        except Exception as e:
+            response.status =  501
+            return e
+        finally:
+            con.close()
 
     def authenticate(self, login, pwd):
         """
