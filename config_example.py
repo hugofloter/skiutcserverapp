@@ -1,0 +1,12 @@
+GINGER_URL = ""
+GINGER_KEY = ""
+SKIUTC_SERVICE = ""
+
+DB_HOST = ""
+DB_NAME = ""
+DB_USER = ""
+DB_PWD = ""
+
+API_PORT =
+SALT = ""
+TOKEN_KEY = ""

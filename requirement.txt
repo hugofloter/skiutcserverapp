@@ -1,0 +1,5 @@
+bottle==0.12.18
+pymysql==0.9.3
+requests==2.22.0
+jwt==0.6.1
+pyjwt==1.7.1
