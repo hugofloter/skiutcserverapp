@@ -1,40 +1,51 @@
 from bottle import request, response
-from bottle import post, put
+from bottle import post, put, get
 from user.user import User
+from utils.middlewares import authenticate
 import json
 
 @post('/users')
-def create_user():
+def reset_pwd():
     """create a user"""
     try:
         data = json.loads(request.body.read())
 
-        return User().reset_password('qrichard')
+        user = User('qrichard')
+
+        return user.reset_password()
 
     except Exception as e:
         return e
 
 @put('/users')
-def change_password():
+@authenticate
+def change_password(user = None):
     """change password user"""
     try:
         data = json.loads(request.body.read())
-        login = data.get('login')
         pwd = data.get('password')
         new_pwd = data.get('new_password')
 
-        return User().change_password(login, pwd, new_pwd)
+        return User(user.get_info()['login']).change_password(pwd, new_pwd)
     except Exception as e:
+        print(e)
         return e
+
 @post('/authenticate')
-def authenticate():
+def authentication():
     """authenticate user"""
     try:
         data = json.loads(request.body.read())
 
         login = data.get('login')
         password = data.get('password')
-        return User().authenticate(login, password)
+        return User(login).authenticate(password)
 
     except Exception as e:
         return e
+
+
+@get('/users')
+@authenticate
+def get_users(user=None):
+    return user.list_users()

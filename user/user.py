@@ -1,15 +1,35 @@
 import requests
 import string
 import random
-import jwt
+import secrets
 from db import dbskiutc_con as db
 from bottle import response
-from config import SKIUTC_SERVICE, GINGER_URL, GINGER_KEY, SALT, TOKEN_KEY
-from utils.errors import AuthenticationError
+from config import SKIUTC_SERVICE, GINGER_URL, GINGER_KEY, SALT
+from utils.errors import Error
 import json
 
 class User():
-    def reset_password(self, login):
+    def __init__(self, login):
+        try:
+            con = db()
+            with con:
+                cur = con.cursor()
+                sql = "SELECT * FROM users_app WHERE login = %s";
+                cur.execute(sql, (login))
+
+                self.user = cur.fetchone()
+
+                if self.user is None:
+                    raise Error('Not Found', 404)
+        except Exception as e:
+            return
+
+    def get_info(self):
+        user = self.user
+        del user['password']
+        return user
+
+    def reset_password(self):
         """
         generate a new password for the login and send it by mail
         """
@@ -21,7 +41,7 @@ class User():
             with con:
                 cur = con.cursor()
                 sql = "UPDATE users_app SET password=aes_encrypt(%s, %s) WHERE login=%s;"
-                cur.execute(sql, (new_pwd, SALT, login))
+                cur.execute(sql, (new_pwd, SALT, self.user['login']))
                 con.commit()
 
                 #Here we have to send the the new password to the email.
@@ -32,7 +52,7 @@ class User():
             response.status = 401
             return { 'error': 'Change password error.' }
 
-    def change_password(self, login, pwd, new_pwd):
+    def change_password(self, pwd, new_pwd):
         """
         to allow the user to change his password
         """
@@ -41,29 +61,32 @@ class User():
             with con:
                 cur = con.cursor()
                 sql = "SELECT * FROM users_app WHERE login=%s and password=aes_encrypt(%s, %s)";
-                cur.execute(sql, (login, pwd, SALT))
+                cur.execute(sql, (self.user['login'], pwd, SALT))
 
                 user = cur.fetchone()
                 if user is None:
-                    raise AuthenticationError
+                    raise Error('Not found', 404)
                 try:
                     sql = "UPDATE users_app SET password=aes_encrypt(%s, %s) WHERE login=%s;"
-                    cur.execute(sql, (new_pwd, SALT, login))
+                    cur.execute(sql, (new_pwd, SALT, self.user['login']))
                     con.commit()
                 except Exception as e:
                     raise e
                     con.rollback()
 
-        except AuthenticationError:
-            response.status = 403
-            return { 'error': 'Authentication error' }
+                return self.get_info()
+
+        except Error as e:
+            return e.get_error()
+
         except Exception as e:
+            print(e)
             response.status =  501
             return e
         finally:
             con.close()
 
-    def authenticate(self, login, pwd):
+    def authenticate(self, pwd):
         """
         check the login and pwd given to authenticate user
         save en give a token
@@ -74,30 +97,28 @@ class User():
             with con:
                 cur = con.cursor()
                 sql = "SELECT * FROM users_app WHERE login=%s and password=aes_encrypt(%s, %s)";
-                cur.execute(sql, (login, pwd, SALT))
+                cur.execute(sql, (self.user['login'], pwd, SALT))
 
                 user = cur.fetchone()
 
                 if user is None:
-                    raise AuthenticationError
+                    raise Error('Authentication error', 403)
 
-                del user['password']
-                encoded = jwt.encode(user,TOKEN_KEY, algorithm='HS256')
+                token = secrets.token_hex(25)
                 try:
                     sql = "DELETE FROM auth_token WHERE login=%s;"
-                    cur.execute(sql, (login))
+                    cur.execute(sql, (self.user['login']))
 
                     sql = "INSERT INTO auth_token (login, token) VALUES (%s, %s);"
-                    cur.execute(sql, (login, encoded))
+                    cur.execute(sql, (self.user['login'], token))
                     con.commit()
 
-                    return { 'user': user, 'token': encoded.decode() }
-                except:
+                    return { 'user': self.get_info(), 'token': token }
+                except Exception as e:
                     con.rollback()
-                    raise AuthenticationError
-        except AuthenticationError:
-            response.status = 403
-            return {"error": 'Authentication error'}
+                    raise Error('Authentication error', 403)
+        except Error as e:
+            return e.get_error()
 
         except Exception as e:
             print(e)
@@ -106,3 +127,26 @@ class User():
         finally:
             cur.close()
             con.close()
+
+
+    def list_users(self):
+        con = db()
+        with con:
+            try:
+                cur = con.cursor()
+                sql = "Select * from users_app";
+                cur.execute(sql)
+
+                users = cur.fetchall()
+
+                users_dict = {}
+                count = 0
+                for user in users:
+                    del user['password']
+                    users_dict[count] = user
+                    count +=1
+
+                return users_dict
+            except Exception as e:
+                response.status = 400
+                return { "error": 'Bad Request.' }

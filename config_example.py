@@ -9,4 +9,3 @@ DB_PWD = ""
 
 API_PORT =
 SALT = ""
-TOKEN_KEY = ""
