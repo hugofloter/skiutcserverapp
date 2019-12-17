@@ -4,19 +4,6 @@ from user.user import User
 from utils.middlewares import authenticate
 import json
 
-@post('/users')
-def reset_pwd():
-    """create a user"""
-    try:
-        data = json.loads(request.body.read())
-
-        user = User('qrichard')
-
-        return user.reset_password()
-
-    except Exception as e:
-        return e
-
 @put('/users')
 @authenticate
 def change_password(user = None):
