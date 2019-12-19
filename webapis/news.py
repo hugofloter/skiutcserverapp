@@ -34,6 +34,7 @@ def create_news(user = None):
 
         return NewsView().create(data)
     except Exception as e:
+        print(e)
         return e
 
 @delete('/v1/news/<id>')

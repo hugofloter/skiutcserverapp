@@ -5,6 +5,8 @@ class User():
         self.firstname = data[2]
         self.email = data[3]
         self.password = data[4]
+        self.is_admin = data[5]
+        self.last_position = data[6]
 
     def to_json(self):
         return {
@@ -12,4 +14,6 @@ class User():
             'lastname': self.lastname,
             'firstname': self.firstname,
             'email': self.email,
+            'isAdmin': self.is_admin,
+            'lastPosition': self.last_position,
         }

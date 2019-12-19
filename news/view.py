@@ -46,12 +46,17 @@ class NewsView():
     def create(self, data):
         try:
             with self.con:
+                title = data.get('title')
+                text = data.get('text')
+                photo = data.get('photo')
+                type = data.get('type')
+
                 cur = self.con.cursor(Model = News)
                 sql = "INSERT INTO news (title, text, photo, date, type) VALUES (%s, %s, %s, %s, %s);"
 
                 now = datetime.now()
                 now = now.strftime('%Y-%m-%d %H:%M:%S')
-                cur.execute(sql, (data['title'], data['text'], data['photo'], now, data['type']))
+                cur.execute(sql, (title, text, photo, now, type))
 
                 self.con.commit()
 
@@ -62,6 +67,7 @@ class NewsView():
                 return last.to_json()
 
         except Exception as e:
+            print(e)
             self.con.rollback()
             return e
 
