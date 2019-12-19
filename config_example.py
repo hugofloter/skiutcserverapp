@@ -1,7 +1,3 @@
-GINGER_URL = ""
-GINGER_KEY = ""
-SKIUTC_SERVICE = ""
-
 DB_HOST = ""
 DB_NAME = ""
 DB_USER = ""
