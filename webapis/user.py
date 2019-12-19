@@ -1,10 +1,10 @@
 from bottle import request, response
 from bottle import post, put, get
-from user.user import User
+from user.view import UserView
 from utils.middlewares import authenticate
 import json
 
-@put('/users')
+@put('/v1/users')
 @authenticate
 def change_password(user = None):
     """change password user"""
@@ -13,12 +13,13 @@ def change_password(user = None):
         pwd = data.get('password')
         new_pwd = data.get('new_password')
 
-        return User(user.get_info()['login']).change_password(pwd, new_pwd)
+        user = user.to_json()
+        return UserView(user['login']).change_password(pwd, new_pwd)
     except Exception as e:
         print(e)
         return e
 
-@post('/authenticate')
+@post('/v1/authenticate')
 def authentication():
     """authenticate user"""
     try:
@@ -26,13 +27,16 @@ def authentication():
 
         login = data.get('login')
         password = data.get('password')
-        return User(login).authenticate(password)
+        return UserView(login).authenticate(password)
 
     except Exception as e:
         return e
 
 
-@get('/users')
+@get('/v1/users')
 @authenticate
 def get_users(user=None):
-    return user.list_users()
+    try:
+        return UserView().list()
+    except Exception as e:
+        print(e)
