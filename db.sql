@@ -35,3 +35,9 @@ CREATE TABLE IF NOT EXISTS `news` (
   `date` DATETIME,
   `type` ENUM('news', 'email')
 );
+
+--
+-- Update table user
+--
+ALTER TABLE `users_app` ADD `isAdmin` Boolean DEFAULT 0;
+ALTER TABLE `users_app` ADD `lastPosition` varchar(30) DEFAULT NULL;
