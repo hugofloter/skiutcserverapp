@@ -11,11 +11,14 @@ class PotinView():
     :return json of list of potin
     :raise Exception
     """
-    def list(self):
+    def list(self, admin = False):
         try:
             with self.con:
                 cur = self.con.cursor(Model = Potin)
-                sql = "SELECT * from potin WHERE approved = TRUE ORDER BY `ìd` DESC"
+                if admin:
+                    sql = "SELECT * from potin WHERE approved = FALSE ORDER BY `ìd` DESC"
+                else:
+                    sql = "SELECT * from potin WHERE approved = TRUE ORDER BY `ìd` DESC"
                 cur.execute(sql)
                 response = cur.fetchall()
                 count = 0
@@ -28,29 +31,6 @@ class PotinView():
                     result[count] = potin
                     count += 1
 
-                return result
-
-        except Exception as e:
-            return e
-
-    """
-    Returns list of Potin to approve by admin
-    :return json of list of potin
-    :raise Exception
-    """
-    def list_to_approve(self):
-        try:
-            with self.con:
-                cur = self.con.cursor(Model = Potin)
-                sql = "SELECT * from potin WHERE approved = FALSE ORDER BY `ìd` DESC"
-                cur.execute(sql)
-                response = cur.fetchall()
-                count = 0
-                result = {}
-                for value in response:
-                    potin = value.to_json()
-                    result[count] = potin
-                    count += 1
                 return result
 
         except Exception as e:

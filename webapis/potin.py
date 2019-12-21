@@ -50,10 +50,10 @@ def delete_potin(id, user=None):
 
 @get('/v1/potins/admin')
 @admin
-def delete_potin(id, user=None):
-    """delete a potin"""
+def get_unapproved_potin(user=None):
+    """get list of potin not approved yet"""
     try:
-        return PotinView().list_to_approve()
+        return PotinView().list(admin = True)
     except Exception as e:
         return e
 
