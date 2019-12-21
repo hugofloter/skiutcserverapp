@@ -9,7 +9,7 @@ class NewsView():
 
     """
     Return the list of news
-    :return Array
+    :return json of list of potin
     :raise Exception
     """
     def list(self):

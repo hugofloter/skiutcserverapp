@@ -8,20 +8,48 @@ class PotinView():
 
     """
     Returns list of Potin
-    :return Array
+    :return json of list of potin
     :raise Exception
     """
     def list(self):
         try:
             with self.con:
                 cur = self.con.cursor(Model = Potin)
-                sql = "SELECT * from potin ORDER BY `ìd` DESC"
+                sql = "SELECT * from potin WHERE approved = TRUE ORDER BY `ìd` DESC"
                 cur.execute(sql)
                 response = cur.fetchall()
                 count = 0
                 result = {}
                 for value in response:
-                    result[count] = value.to_json()
+                    potin = value.to_json()
+                    #check if anonymous
+                    if potin.get('isAnonymous'):
+                        potin['sender'] = None
+                    result[count] = potin
+                    count += 1
+
+                return result
+
+        except Exception as e:
+            return e
+
+    """
+    Returns list of Potin to approve by admin
+    :return json of list of potin
+    :raise Exception
+    """
+    def list_to_approve(self):
+        try:
+            with self.con:
+                cur = self.con.cursor(Model = Potin)
+                sql = "SELECT * from potin WHERE approved = FALSE ORDER BY `ìd` DESC"
+                cur.execute(sql)
+                response = cur.fetchall()
+                count = 0
+                result = {}
+                for value in response:
+                    potin = value.to_json()
+                    result[count] = potin
                     count += 1
                 return result
 
@@ -31,18 +59,23 @@ class PotinView():
     """
     Return a potin given an id
     :param id
+    :raise Exception
     """
     def get(self, id):
         try:
             with self.con:
                 cur = self.con.cursor(Model = Potin)
-                sql = "SELECT * from potin WHERE id = %s"
+                sql = "SELECT * from potin WHERE id = %s AND approved = TRUE"
                 cur.execute(sql, id)
                 response = cur.fetchone()
                 if response is None:
                     return {}
+                potin = response.to_json()
+                #check if anonymous
+                if potin.get('isAnonymous'):
+                    potin['sender'] = None
 
-                return response.to_json()
+                return potin
 
         except Exception as e:
             return e
@@ -63,11 +96,9 @@ class PotinView():
                 sql = "INSERT INTO news (title, text, approved, sender, isAnonymous) VALUES (%s, %s, %s, %s, %s)"
                 cur.execute(sql, (title, text, approved, sender, isAnonymous))
                 self.con.commit()
-                sql = "SELECT * FROM news ORDER BY ID DESC"
-                cur.execute(sql)
-                last = cur.fetchone()
+                #No need to return because not approved yet
 
-                return last.to_json()
+                return {}
 
         except Exception as e:
             print(e)
