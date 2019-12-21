@@ -1,9 +1,9 @@
 import json
-
 from bottle import request, response
 from bottle import get, post, delete
 from news.view import NewsView
 from utils.middlewares import authenticate, admin
+
 
 @get('/v1/news')
 @authenticate
@@ -12,7 +12,8 @@ def get_news(user=None):
     try:
         return NewsView().list()
     except Exception as e:
-        return e;
+        return e
+
 
 @get('/v1/news/<id>')
 @authenticate
@@ -35,6 +36,7 @@ def create_news(user = None):
     except Exception as e:
         print(e)
         return e
+
 
 @delete('/v1/news/<id>')
 @admin

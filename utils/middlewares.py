@@ -4,6 +4,7 @@ from db import dbskiutc_con as db
 from auth_token.view import AuthTokenView
 from functools import wraps
 
+
 def authenticate(f):
     """
     :param f: every api rest functions
