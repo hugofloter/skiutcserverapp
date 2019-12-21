@@ -16,9 +16,9 @@ class PotinView():
             with self.con:
                 cur = self.con.cursor(Model = Potin)
                 if admin:
-                    sql = "SELECT * from potin WHERE approved = FALSE ORDER BY `ìd` DESC"
+                    sql = "SELECT * from potin WHERE approved = 0 ORDER BY `ìd` DESC"
                 else:
-                    sql = "SELECT * from potin WHERE approved = TRUE ORDER BY `ìd` DESC"
+                    sql = "SELECT * from potin WHERE approved = 1 ORDER BY `ìd` DESC"
                 cur.execute(sql)
                 response = cur.fetchall()
                 count = 0
@@ -45,7 +45,7 @@ class PotinView():
         try:
             with self.con:
                 cur = self.con.cursor(Model = Potin)
-                sql = "SELECT * from potin WHERE id = %s AND approved = TRUE"
+                sql = "SELECT * from potin WHERE id = %s AND approved = 1"
                 cur.execute(sql, id)
                 response = cur.fetchone()
                 if response is None:
@@ -111,7 +111,7 @@ class PotinView():
         try:
             with self.con:
                 cur = self.con.cursor(Model = Potin)
-                sql = "UPDATE potin SET approved = TRUE WHERE id = %s"
+                sql = "UPDATE potin SET approved = 1 WHERE id = %s"
                 cur.execute(sql, (id))
                 self.con.commit()
 
