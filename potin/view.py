@@ -122,3 +122,21 @@ class PotinView():
         except Exception as e:
             self.con.rollback()
             return e
+
+    """
+    Update a potin given an id
+    :param id
+    """
+    def update(self, id):
+        try:
+            with self.con:
+                cur = self.con.cursor(Model = Potin)
+                sql = "UPDATE potin SET approved = TRUE WHERE id = %s"
+                cur.execute(sql, (id))
+                self.con.commit()
+
+                return self.list()
+
+        except Exception as e:
+            self.con.rollback()
+            return e
