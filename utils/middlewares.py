@@ -1,8 +1,8 @@
 from bottle import request
-from db import dbskiutc_con as db
 from utils.errors import Error
+from db import dbskiutc_con as db
+from auth_token.view import AuthTokenView
 from functools import wraps
-from user.user import User
 
 def authenticate(f):
     """
@@ -14,26 +14,33 @@ def authenticate(f):
         auth = request.headers.get('Authorization')
         if auth is None:
             return Error('Not Logged', 403).get_error()
+        user = AuthTokenView().get(auth)
 
-        con = db()
-        with con:
-            try:
-                cur = con.cursor()
-                sql = "SELECT * FROM auth_token WHERE token=%s";
-                cur.execute(sql, (auth))
+        if isinstance(user, dict):
+            return user
+        return f(user=user, *args, **kwargs)
 
-                authentication = cur.fetchone()
+    return wrapper
 
-                if authentication is None:
-                    raise Error('Not logged', 403)
 
-                user = User(authentication['login'])
-                return f(user=user, *args, **kwargs)
+def admin(f):
+    """
+    :param f: every api rest functions
+    :return: function if user is auth
+    """
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        auth = request.headers.get('Authorization')
+        if auth is None:
+            return Error('Not Logged', 403).get_error()
+        user = AuthTokenView().get(auth)
 
-            except Error as e:
-                return e.get_error()
+        if isinstance(user, dict):
+            return user
 
-            except Exception as e:
-                return e
+        if not user.to_json()['isAdmin']:
+            return Error('Not Admin', 403).get_error()
+
+        return f(user=user, *args, **kwargs)
 
     return wrapper
