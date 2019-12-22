@@ -33,7 +33,10 @@ def create_potin(user = None):
     try:
         data = json.loads(request.body.read())
         data["approved"] = False
+        data["sender"] = user.get("login")
+
         return PotinView().create(data)
+
     except Exception as e:
         print(e)
         return e

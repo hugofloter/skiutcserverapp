@@ -16,9 +16,9 @@ class PotinView():
             with self.con:
                 cur = self.con.cursor(Model = Potin)
                 if admin:
-                    sql = "SELECT * from potin WHERE approved = 0 ORDER BY `ìd` DESC"
+                    sql = "SELECT * from potin WHERE approved = 0 ORDER BY ID DESC"
                 else:
-                    sql = "SELECT * from potin WHERE approved = 1 ORDER BY `ìd` DESC"
+                    sql = "SELECT * from potin WHERE approved = 1 ORDER BY ID DESC"
                 cur.execute(sql)
                 response = cur.fetchall()
                 count = 0
@@ -73,7 +73,7 @@ class PotinView():
                 sender = data.get('sender')
                 isAnonymous = data.get('isAnonymous')
                 cur = self.con.cursor(Model = Potin)
-                sql = "INSERT INTO news (title, text, approved, sender, isAnonymous) VALUES (%s, %s, %s, %s, %s)"
+                sql = "INSERT INTO potin (title, text, approved, sender, isAnonymous) VALUES (%s, %s, %s, %s, %s)"
                 cur.execute(sql, (title, text, approved, sender, isAnonymous))
                 self.con.commit()
                 #No need to return because not approved yet
