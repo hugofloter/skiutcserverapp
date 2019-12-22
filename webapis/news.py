@@ -5,7 +5,7 @@ from news.view import NewsView
 from utils.middlewares import authenticate, admin
 
 
-@get('/v1/news')
+@get('/news')
 @authenticate
 def get_news(user=None):
     """get all news"""
@@ -15,7 +15,7 @@ def get_news(user=None):
         return e
 
 
-@get('/v1/news/<id>')
+@get('/news/<id>')
 @authenticate
 def get_one_news(id, user=None):
     """get only one new"""
@@ -25,7 +25,7 @@ def get_one_news(id, user=None):
         return e
 
 
-@post('/v1/news')
+@post('/news')
 @admin
 def create_news(user = None):
     """create a news"""
@@ -38,7 +38,7 @@ def create_news(user = None):
         return e
 
 
-@delete('/v1/news/<id>')
+@delete('/news/<id>')
 @admin
 def delete_news(id, user=None):
     """delete a news"""

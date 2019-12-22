@@ -6,7 +6,7 @@ from potin.view import PotinView
 from utils.middlewares import authenticate, admin
 
 
-@get('/v1/potins')
+@get('/potins')
 @authenticate
 def get_potins(user=None):
     """get all potins"""
@@ -16,7 +16,7 @@ def get_potins(user=None):
         return e;
 
 
-@get('/v1/potins/<id>')
+@get('/potins/<id>')
 @authenticate
 def get_one_potin(id, user=None):
     """get only one potin"""
@@ -26,7 +26,7 @@ def get_one_potin(id, user=None):
         return e
 
 
-@post('/v1/potins')
+@post('/potins')
 @authenticate
 def create_potin(user = None):
     """create a potin"""
@@ -48,7 +48,7 @@ def delete_potin(id, user=None):
         return e
 
 
-@get('/v1/potins/admin')
+@get('/potins/admin')
 @admin
 def get_unapproved_potin(user=None):
     """get list of potin not approved yet"""
@@ -58,7 +58,7 @@ def get_unapproved_potin(user=None):
         return e
 
 
-@put('/v1/potins/<id>')
+@put('/potins/<id>')
 @admin
 def update_potin(id, user=None):
     """update a potin and set to approved"""
