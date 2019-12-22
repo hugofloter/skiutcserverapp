@@ -22,10 +22,8 @@ def change_password(user = None):
 @post('/v1/authenticate')
 def authentication():
     """authenticate user"""
-    print("loginnnnnnnn")
     try:
         data = json.loads(request.body.read())
-
         login = data.get('login')
         password = data.get('password')
         return UserView(login).authenticate(password)
