@@ -4,7 +4,7 @@ from user.view import UserView
 from utils.middlewares import authenticate
 import json
 
-@put('/v1/users')
+@put('/users')
 @authenticate
 def change_password(user = None):
     """change password user"""
@@ -19,12 +19,11 @@ def change_password(user = None):
         print(e)
         return e
 
-@post('/v1/authenticate')
+@post('/authenticate')
 def authentication():
     """authenticate user"""
     try:
         data = json.loads(request.body.read())
-
         login = data.get('login')
         password = data.get('password')
         return UserView(login).authenticate(password)
@@ -33,7 +32,7 @@ def authentication():
         return e
 
 
-@get('/v1/users')
+@get('/users')
 @authenticate
 def get_users(user=None):
     try:

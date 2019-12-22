@@ -3,6 +3,7 @@ import pymysql
 from pymysql.cursors import Cursor
 from pymysql.connections import Connection
 
+
 class CustomConnection(Connection):
     def cursor(self, cursor=None, Model=None):
         """
@@ -13,6 +14,7 @@ class CustomConnection(Connection):
         if Model is None:
             return self.cursorclass(self)
         return self.cursorclass(self, Model=Model)
+
 
 class CustomCursor(Cursor):
     def __init__(self, connection, Model=None):
@@ -56,6 +58,7 @@ class CustomCursor(Cursor):
         self.rownumber = len(self._rows)
         return result
 
+
 def dbskiutc_con():
     con = CustomConnection(
         host=DB_HOST,
@@ -67,6 +70,7 @@ def dbskiutc_con():
     )
 
     return con
+
 
 if __name__ == '__main__':
     _main(sys.argv)

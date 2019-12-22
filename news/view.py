@@ -7,34 +7,39 @@ class NewsView():
     def __init__(self):
         self.con = db()
 
+    """
+    Return the list of news
+    :return json of list of potin
+    :raise Exception
+    """
     def list(self):
         try:
             with self.con:
                 cur = self.con.cursor(Model = News)
-                sql = "SELECT * from news ORDER BY date DESC";
+                sql = "SELECT * from news ORDER BY date DESC"
                 cur.execute(sql)
-
                 response = cur.fetchall()
-
                 count = 0
                 result = {}
                 for value in response:
                     result[count] = value.to_json()
-                    count +=1;
+                    count += 1
                 return result
 
         except Exception as e:
             return e
 
+    """
+    Return a news given an id
+    :param id
+    """
     def get(self, id):
         try:
             with self.con:
                 cur = self.con.cursor(Model = News)
-                sql = "SELECT * from news WHERE id = %s";
+                sql = "SELECT * from news WHERE id = %s"
                 cur.execute(sql, id)
-
                 response = cur.fetchone()
-
                 if response is None:
                     return {}
 
@@ -43,6 +48,10 @@ class NewsView():
         except Exception as e:
             return e
 
+    """
+    Create a news given datas model
+    :param data
+    """
     def create(self, data):
         try:
             with self.con:
@@ -50,17 +59,13 @@ class NewsView():
                 text = data.get('text')
                 photo = data.get('photo')
                 type = data.get('type')
-
                 cur = self.con.cursor(Model = News)
-                sql = "INSERT INTO news (title, text, photo, date, type) VALUES (%s, %s, %s, %s, %s);"
-
+                sql = "INSERT INTO news (title, text, photo, date, type) VALUES (%s, %s, %s, %s, %s)"
                 now = datetime.now()
                 now = now.strftime('%Y-%m-%d %H:%M:%S')
                 cur.execute(sql, (title, text, photo, now, type))
-
                 self.con.commit()
-
-                sql =  "SELECT * FROM news ORDER BY ID DESC;"
+                sql = "SELECT * FROM news ORDER BY ID DESC"
                 cur.execute(sql)
                 last = cur.fetchone()
 
@@ -71,13 +76,16 @@ class NewsView():
             self.con.rollback()
             return e
 
+    """
+    Delete a news given an id
+    :param id
+    """
     def delete(self, id):
         try:
             with self.con:
                 cur = self.con.cursor(Model = News)
-                sql = "DELETE FROM news WHERE id = %s;";
+                sql = "DELETE FROM news WHERE id = %s"
                 cur.execute(sql, (id))
-
                 self.con.commit()
 
                 return self.list()

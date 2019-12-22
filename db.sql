@@ -36,8 +36,28 @@ CREATE TABLE IF NOT EXISTS `news` (
   `type` ENUM('news', 'email')
 );
 
+
+--
+-- Table structure for table `potin`
+--
+
+ALTER TABLE `users_app` DROP PRIMARY KEY, ADD PRIMARY KEY (`login`);
+
+CREATE TABLE IF NOT EXISTS `potin` (
+  `id` int(10) PRIMARY KEY AUTO_INCREMENT,
+  `title` varchar(20),
+  `text` text,
+  `approved` boolean DEFAULT FALSE,
+  `sender` varchar(40) NOT NULL,
+  `isAnonymous` boolean DEFAULT TRUE,
+  INDEX sender_index (sender),
+  FOREIGN KEY (sender)
+    REFERENCES users_app(login)
+    ON DELETE CASCADE
+);
+
 --
 -- Update table user
 --
-ALTER TABLE `users_app` ADD `isAdmin` Boolean DEFAULT 0;
-ALTER TABLE `users_app` ADD `lastPosition` varchar(30) DEFAULT NULL;
+ALTER TABLE `users_app` DROP `isAdmin`, ADD `isAdmin` Boolean DEFAULT 0;
+ALTER TABLE `users_app` DROP `lastPosition`, ADD `lastPosition` varchar(30) DEFAULT NULL;

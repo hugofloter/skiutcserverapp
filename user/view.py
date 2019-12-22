@@ -10,6 +10,7 @@ import json
 
 from user.model import User
 
+
 class UserView():
     def __init__(self, login = None):
         self.con = db()
@@ -28,15 +29,13 @@ class UserView():
                 sql = "UPDATE users_app SET password=aes_encrypt(%s, %s) WHERE login=%s;"
                 cur.execute(sql, (new_pwd, SALT, self.login))
                 self.con.commit()
-
-                #Here we have to send the the new password to the email.
+                #@TODO Here we have to send the the new password to the email.
                 return new_pwd
 
         except Exception as e:
             self.con.rollback()
             response.status = 401
-            return { 'error': 'Change password error.' }
-
+            return {'error': 'Change password error.'}
 
     def change_password(self, pwd, new_pwd):
         """
@@ -45,72 +44,68 @@ class UserView():
         try:
             with self.con:
                 cur = self.con.cursor(Model = User)
-                sql = "SELECT * FROM users_app WHERE login=%s and password=aes_encrypt(%s, %s)";
+                sql = "SELECT * FROM users_app WHERE login=%s and password=aes_encrypt(%s, %s)"
                 cur.execute(sql, (self.login, pwd, SALT))
-
                 user = cur.fetchone()
                 if user is None:
                     raise Error('Not found', 404)
                 try:
-                    sql = "UPDATE users_app SET password=aes_encrypt(%s, %s) WHERE login=%s;"
+                    sql = "UPDATE users_app SET password=aes_encrypt(%s, %s) WHERE login=%s"
                     cur.execute(sql, (new_pwd, SALT, self.login))
                     self.con.commit()
                 except Exception as e:
                     raise e
                     self.con.rollback()
-
-                sql =  "SELECT * FROM users_app WHERE login=%s";
+                sql = "SELECT * FROM users_app WHERE login=%s"
                 cur.execute(sql, (self.login))
-
                 user = cur.fetchone()
+
                 return user.to_json()
 
         except Error as e:
             return e.get_error()
 
         except Exception as e:
-            response.status =  501
+            response.status = 501
             return e
+
         finally:
             self.con.close()
-
 
     def authenticate(self, pwd):
         """
         check the login and pwd given to authenticate user
         save en give a token
         """
-
         try:
             with self.con:
                 cur = self.con.cursor(Model = User)
-                sql = "SELECT * FROM users_app WHERE login=%s and password=aes_encrypt(%s, %s)";
+                sql = "SELECT * FROM users_app WHERE login=%s and password=aes_encrypt(%s, %s)"
                 cur.execute(sql, (self.login, pwd, SALT))
-
                 user = cur.fetchone()
-
                 if user is None:
                     raise Error('Authentication error', 403)
-
                 token = secrets.token_hex(25)
                 try:
-                    sql = "DELETE FROM auth_token WHERE login=%s;"
+                    sql = "DELETE FROM auth_token WHERE login=%s"
                     cur.execute(sql, (self.login))
-
-                    sql = "INSERT INTO auth_token (login, token) VALUES (%s, %s);"
+                    sql = "INSERT INTO auth_token (login, token) VALUES (%s, %s)"
                     cur.execute(sql, (self.login, token))
                     self.con.commit()
 
-                    return { 'user': user.to_json(), 'token': token }
+                    return {'user': user.to_json(), 'token': token}
+
                 except Exception as e:
                     self.con.rollback()
                     raise Error('Authentication error', 403)
+
         except Error as e:
             return e.get_error()
 
         except Exception as e:
             response.status = 400
             return {"error": 'Bad Request'}
+
         finally:
             cur.close()
             self.con.close()
@@ -118,16 +113,15 @@ class UserView():
     def get(self, login=None):
         if login is None:
             login = self.login
-
         with self.con:
             try:
                 cur = self.con.cursor(Model= User)
-                sql = "SELECT * FROM users_app WHERE login=%s";
+                sql = "SELECT * FROM users_app WHERE login=%s"
                 cur.execute(sql, (login))
-
                 user = cur.fetchone()
 
                 return user
+
             except Exception as e:
                 print(e)
                 return Error('Bad Request', 400).get_error()
@@ -136,18 +130,17 @@ class UserView():
         with self.con:
             try:
                 cur = self.con.cursor(Model = User)
-                sql = "Select * from users_app";
+                sql = "Select * from users_app"
                 cur.execute(sql)
-
                 users = cur.fetchall()
-
                 users_dict = {}
                 count = 0
                 for user in users:
                     users_dict[count] = user.to_json()
-                    count +=1
+                    count += 1
 
                 return users_dict
+
             except Exception as e:
                 response.status = 400
-                return { "error": 'Bad Request.' }
+                return {"error": 'Bad Request.'}
