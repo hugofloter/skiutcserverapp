@@ -16,9 +16,9 @@ class PotinView():
             with self.con:
                 cur = self.con.cursor(Model = Potin)
                 if admin:
-                    sql = "SELECT * from potin WHERE approved = 0 ORDER BY ID DESC"
+                    sql = "SELECT * from potin WHERE approved = 0 ORDER BY id DESC"
                 else:
-                    sql = "SELECT * from potin WHERE approved = 1 ORDER BY ID DESC"
+                    sql = "SELECT * from potin WHERE approved = 1 ORDER BY id DESC"
                 cur.execute(sql)
                 response = cur.fetchall()
                 count = 0
