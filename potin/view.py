@@ -76,9 +76,11 @@ class PotinView():
                 sql = "INSERT INTO potin (title, text, approved, sender, isAnonymous) VALUES (%s, %s, %s, %s, %s)"
                 cur.execute(sql, (title, text, approved, sender, isAnonymous))
                 self.con.commit()
-                #No need to return because not approved yet
+                sql = "SELECT * FROM potin ORDER BY id DESC"
+                cur.execute(sql)
+                last = cur.fetchone()
 
-                return {}
+                return last.to_json()
 
         except Exception as e:
             print(e)
