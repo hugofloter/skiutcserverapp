@@ -33,7 +33,7 @@ def create_potin(user = None):
     try:
         data = json.loads(request.body.read())
         data["approved"] = False
-        data["sender"] = user.get("login")
+        data["sender"] = user.to_json().get("login")
 
         return PotinView().create(data)
 
@@ -41,7 +41,7 @@ def create_potin(user = None):
         print(e)
         return e
 
-@delete('/v1/potins/<id>')
+@delete('/potins/<id>')
 @admin
 def delete_potin(id, user=None):
     """delete a potin"""
