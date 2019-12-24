@@ -61,3 +61,5 @@ CREATE TABLE IF NOT EXISTS `potin` (
 --
 ALTER TABLE `users_app` DROP `isAdmin`, ADD `isAdmin` Boolean DEFAULT 0;
 ALTER TABLE `users_app` DROP `lastPosition`, ADD `lastPosition` varchar(30) DEFAULT NULL;
+ALTER TABLE `users_app` MODIFY `email` VARCHAR(50);
+
