@@ -57,6 +57,12 @@ CREATE TABLE IF NOT EXISTS `potin` (
 );
 
 --
+-- Udpate table potin
+--
+ALTER TABLE `potin` MODIFY  `title` VARCHAR(50);
+
+
+--
 -- Update table user
 --
 ALTER TABLE `users_app` DROP `isAdmin`, ADD `isAdmin` Boolean DEFAULT 0;
