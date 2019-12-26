@@ -25,7 +25,6 @@ class NotificationsView():
             self.publishmessagelist.append(new_publish)
 
     def send_push_message(self):
-        print("trying to send notification")
         try:
             response = PushClient().publish_multiple(self.publishmessagelist)
 
