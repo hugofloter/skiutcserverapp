@@ -1,11 +1,6 @@
 from db import dbskiutc_con as db
-from exponent_server_sdk import DeviceNotRegisteredError
-from exponent_server_sdk import PushClient
-from exponent_server_sdk import PushMessage
-from exponent_server_sdk import PushResponseError
-from exponent_server_sdk import PushServerError
-from requests.exceptions import ConnectionError
-from requests.exceptions import HTTPError
+from exponent_server_sdk import DeviceNotRegisteredError, PushClient,PushMessage, PushResponseError, PushServerError
+from requests.exceptions import ConnectionError, HTTPError
 
 
 #@TODO return error to d=response.code and so on...

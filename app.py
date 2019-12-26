@@ -1,6 +1,6 @@
 from bottle import run, get, hook, response, route
 from config import API_PORT
-from webapis import user, news, potin, notifications
+from webapis import user, news, potin
 
 
 @hook('after_request')

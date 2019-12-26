@@ -2,6 +2,10 @@ from news.model import News
 from db import dbskiutc_con as db
 from utils.errors import Error
 from datetime import datetime
+from user.view import UserView
+from notifications.view import NotificationsView
+from notifications.model import NotificationMessage
+
 
 class NewsView():
     def __init__(self):
@@ -68,6 +72,9 @@ class NewsView():
                 sql = "SELECT * FROM news ORDER BY ID DESC"
                 cur.execute(sql)
                 last = cur.fetchone()
+                tokens = UserView().list_tokens()
+                message = NotificationMessage(data)
+                NotificationsView(message, tokens).send_push_message()
 
                 return last.to_json()
 
