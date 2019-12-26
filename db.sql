@@ -68,3 +68,34 @@ ALTER TABLE `potin` MODIFY  `title` VARCHAR(50);
 ALTER TABLE `users_app` DROP `isAdmin`, ADD `isAdmin` Boolean DEFAULT 0;
 ALTER TABLE `users_app` DROP `lastPosition`, ADD `lastPosition` varchar(30) DEFAULT NULL;
 ALTER TABLE `users_app` MODIFY `email` VARCHAR(50);
+
+--
+-- Table structure for table `groups`
+--
+
+CREATE TABLE IF NOT EXISTS `groups` (
+  `id` int(10) PRIMARY KEY AUTO_INCREMENT,
+  `name` varchar(20),
+  `owner` varchar(40) NOT NULL,
+  `beer_call` date DEFAULT NULL,
+  INDEX owner_index (owner),
+  FOREIGN KEY (owner)
+    REFERENCES users_app(login)
+    ON DELETE CASCADE
+);
+
+--
+-- Table structure for table `usergroup`
+--
+
+CREATE TABLE IF NOT EXISTS `usergroup` (
+  `login_user` varchar(20) NOT NULL,
+  `id_group` int(10) NOT NULL,
+  `status` ENUM('V', 'P') DEFAULT 'P',
+  `share_position` boolean DEFAULT FALSE,
+  `expiration_date` date DEFAULT NULL,
+  INDEX group_index (id_group),
+  FOREIGN KEY (id_group)
+    REFERENCES `groups`(id)
+    ON DELETE CASCADE
+);
