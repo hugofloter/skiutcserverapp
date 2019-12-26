@@ -1,9 +1,9 @@
 --
 -- Table structure for table `auth_token`
 --
-CREATE DATABASE IF NOT EXISTS skiutcapp2;
+CREATE DATABASE IF NOT EXISTS skiutcapp;
 
-USE skiutcapp2;
+USE skiutcapp;
 
 CREATE TABLE IF NOT EXISTS `auth_token` (
   `login` varchar(40) NOT NULL,
