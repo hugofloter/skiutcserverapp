@@ -21,7 +21,7 @@ class NotificationsView():
 
     def send_push_message(self):
         try:
-            response = PushClient().publish_multiple(self.publishmessagelist)
+            responses = PushClient().publish_multiple(self.publishmessagelist)
 
         except PushServerError as exc:
             print("pushservererror", exc)
@@ -35,8 +35,9 @@ class NotificationsView():
             # We got a response back, but we don't know whether it's an error yet.
             # This call raises errors so we can handle them with normal exception
             # flows.
-            response.validate_response()
-            return response
+            for response in responses:
+                response.validate_response()
+            return responses
 
         except PushResponseError as exc:
             # Encountered some other per-notification error.
