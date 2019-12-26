@@ -10,7 +10,7 @@ class GroupView():
     Create a group given datas model
     :param data
     """
-    def create(self, data):
+    def create(self, data, list_login):
         try:
             with self.con:
                 name = data.get('name')
@@ -22,6 +22,7 @@ class GroupView():
                 sql = "SELECT * FROM `groups` ORDER BY id DESC"
                 cur.execute(sql)
                 last = cur.fetchone()
+                self.add_to_group(last.to_json().get('id'), list_login)
 
                 return last.to_json()
 
@@ -31,22 +32,42 @@ class GroupView():
             return e
 
     """
+    delete a group given id
+    :param data
+    """
+    def delete(self, id_group, login):
+        try:
+            with self.con:
+                cur = self.con.cursor(Model = Group)
+                sql = "DELETE FROM `groups` WHERE id = %s AND owner=%s"
+                cur.execute(sql, (id_group,  login))
+                self.con.commit()
+
+                return self.list(login)
+
+        except Exception as e:
+            self.con.rollback()
+            return e
+
+    """
     :param id - id of group
     :param loginList list of login to add
     :return json list of user added to group on usergroup format
     """
-    def add_to_group(self, id, loginList):
+    def add_to_group(self, id_group, login_list):
         result = {}
         count = 0
-        for login in loginList:
+        # @TODO use Notification here
+
+        for login in login_list:
             try:
                 with self.con:
                     cur = self.con.cursor(Model = UserGroup)
                     sql = "INSERT INTO `usergroup` (`login_user`, `id_group`) VALUES (%s, %s)"
-                    cur.execute(sql, (login, id))
+                    cur.execute(sql, (login, id_group))
                     self.con.commit()
                     sql = "SELECT * FROM `usergroup` WHERE `ìd_group` = %s AND `login_user` = %s"
-                    cur.execute(sql, (id, login))
+                    cur.execute(sql, (id_group, login))
                     last = cur.fetchone()
                     result[count] = last
                     count += 1
@@ -57,12 +78,12 @@ class GroupView():
                 return e
         return result
 
-    def list_user_from_group(self, id):
+    def list_user_from_group(self, id_group):
         try:
             with self.con:
                 cur = self.con.cursor(Model = UserGroup)
                 sql = "SELECT * from `usergroup` WHERE `ìd_group` = %s"
-                cur.execute(sql, id)
+                cur.execute(sql, id_group)
                 response = cur.fetchall()
                 count = 0
                 result = {}
@@ -79,17 +100,18 @@ class GroupView():
     """
     get group from id
     """
-    def get(self, id):
+    def get(self, id_group):
         try:
             with self.con:
                 cur = self.con.cursor(Model = Group)
                 sql = "SELECT * from `groups` WHERE id = %s"
-                cur.execute(sql, id)
+                cur.execute(sql, id_group)
                 response = cur.fetchone()
                 if response is None:
                     return {}
+                list_users = self.list_user_from_group(id_group)
 
-                return response.to_json()
+                return {'group': response.to_json(), 'list_users': list_users }
 
         except Exception as e:
             return e
@@ -100,7 +122,7 @@ class GroupView():
     def list(self, login):
         try:
             with self.con:
-                cur = self.con.cursor(Model = Group)
+                cur = self.con.cursor(Model = UserGroup)
                 sql = "SELECT * from `usergroup` WHERE `login_user` = %s"
                 cur.execute(sql, login)
                 response = cur.fetchall()
@@ -110,7 +132,7 @@ class GroupView():
                 result = {}
                 for u in response:
                     current = u.to_json()
-                    group = self.get(current['id'])
+                    group = self.get(current.get('id'))
                     result[count] = group
                     count += 1
 
@@ -120,14 +142,14 @@ class GroupView():
             return e
 
     """
-    remove a user from a group - used when user decide to cancel invitation to group
+    remove a user from a group - used when user decide to avoid invitation to group
     """
-    def remove_from_group(self, id, login):
+    def remove_from_group(self, id_group, login):
         try:
             with self.con:
                 cur = self.con.cursor(Model = UserGroup)
-                sql = "DELETE FROM `usergroup` WHERE id = %s AND login = %S"
-                cur.execute(sql, (id, login))
+                sql = "DELETE FROM `usergroup` WHERE `ìd_group` = %s AND `login_user` = %S"
+                cur.execute(sql, (id_group, login))
                 self.con.commit()
 
                 return self.list(login)
@@ -139,17 +161,35 @@ class GroupView():
     Update a group given an id
     :param id
     """
-    def update_group(self, id):
+    def accept_group(self, id_group, login):
         try:
             with self.con:
-                cur = self.con.cursor(Model = Potin)
-                sql = "UPDATE potin SET approved = 1 WHERE id = %s"
-                cur.execute(sql, id)
+                cur = self.con.cursor(Model = UserGroup)
+                sql = "UPDATE `usergroup` SET status = 'V' WHERE `ìd_group` = %s AND `login_user` = %S"
+                cur.execute(sql, (id_group, login))
                 self.con.commit()
 
-                return self.list()
+                return self.list(login)
 
         except Exception as e:
             self.con.rollback()
             return e
 
+    """
+    Set a new beer call to group
+    :param id
+    """
+    def new_beer_call(self, id_group, new_bee_call):
+        try:
+            with self.con:
+                cur = self.con.cursor(Model = UserGroup)
+                sql = "UPDATE `groups` SET `beer_call` = %s WHERE id = %s"
+                cur.execute(sql, (id_group, new_bee_call))
+                self.con.commit()
+                #@TODO use Notification here
+
+                return self.get(id_group)
+
+        except Exception as e:
+            self.con.rollback()
+            return e
