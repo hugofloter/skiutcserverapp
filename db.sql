@@ -22,7 +22,8 @@ CREATE TABLE IF NOT EXISTS`users_app` (
   `email` varchar(40) DEFAULT NULL,
   `password` varbinary(50) DEFAULT NULL,
   `isAdmin` Boolean DEFAULT FALSE,
-  `lastPosition` varchar(30) DEFAULT NULL
+  `lastPosition` varchar(30) DEFAULT NULL,
+  `push_token` varchar DEFAULT NULL
 );
 
 --
@@ -69,4 +70,5 @@ ALTER TABLE `potin` MODIFY  `title` VARCHAR(50);
 --
 ALTER TABLE `users_app` DROP `isAdmin`, ADD `isAdmin` Boolean DEFAULT 0;
 ALTER TABLE `users_app` DROP `lastPosition`, ADD `lastPosition` varchar(30) DEFAULT NULL;
+ALTER TABLE `users_app` ADD `push_token` varchar(250) DEFAULT NULL;
 ALTER TABLE `users_app` MODIFY `email` VARCHAR(50);

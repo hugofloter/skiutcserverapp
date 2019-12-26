@@ -4,6 +4,7 @@ from user.view import UserView
 from utils.middlewares import authenticate
 import json
 
+
 @put('/users')
 @authenticate
 def change_password(user = None):
@@ -18,6 +19,7 @@ def change_password(user = None):
     except Exception as e:
         print(e)
         return e
+
 
 @post('/authenticate')
 def authentication():
@@ -39,3 +41,17 @@ def get_users(user=None):
         return UserView().list()
     except Exception as e:
         print(e)
+
+
+@post('/users/pushtoken')
+@authenticate
+def push_token(user=None):
+    try:
+        data = json.loads(request.body.read())
+        token = data.get('token')
+        login = user.to_json().get('login')
+        return UserView(login).push_token(token)
+
+    except Exception as e:
+        print(e)
+        return e

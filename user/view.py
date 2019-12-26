@@ -54,12 +54,11 @@ class UserView():
                     cur.execute(sql, (new_pwd, SALT, self.login))
                     self.con.commit()
                 except Exception as e:
-                    raise e
                     self.con.rollback()
+                    raise e
                 sql = "SELECT * FROM users_app WHERE login=%s"
-                cur.execute(sql, (self.login))
+                cur.execute(sql, self.login)
                 user = cur.fetchone()
-
                 return user.to_json()
 
         except Error as e:
@@ -88,7 +87,7 @@ class UserView():
                 token = secrets.token_hex(25)
                 try:
                     sql = "DELETE FROM auth_token WHERE login=%s"
-                    cur.execute(sql, (self.login))
+                    cur.execute(sql, self.login)
                     sql = "INSERT INTO auth_token (login, token) VALUES (%s, %s)"
                     cur.execute(sql, (self.login, token))
                     self.con.commit()
@@ -117,7 +116,7 @@ class UserView():
             try:
                 cur = self.con.cursor(Model= User)
                 sql = "SELECT * FROM users_app WHERE login=%s"
-                cur.execute(sql, (login))
+                cur.execute(sql, login)
                 user = cur.fetchone()
 
                 return user
@@ -142,5 +141,71 @@ class UserView():
                 return users_dict
 
             except Exception as e:
+                response.status = 400
+                return {"error": 'Bad Request.'}
+
+    def push_token(self, push_token):
+        try:
+            with self.con:
+                try:
+                    cur = self.con.cursor(Model=User)
+                    sql = "UPDATE users_app SET `push_token`=%s WHERE login=%s"
+                    cur.execute(sql, (push_token, self.login))
+                    self.con.commit()
+
+                except Exception as e:
+                    self.con.rollback()
+                    raise e
+
+                sql = "SELECT * FROM users_app WHERE login=%s"
+                cur.execute(sql, self.login)
+                user = cur.fetchone()
+
+                return user.to_json()
+
+        except Error as e:
+            return e.get_error()
+
+        except Exception as e:
+            response.status = 501
+            return e
+
+        finally:
+            self.con.close()
+
+    def list_tokens(self):
+        with self.con:
+            try:
+                cur = self.con.cursor(Model = User)
+                sql = "SELECT * FROM users_app WHERE push_token IS NOT NULL"
+                cur.execute(sql)
+                user_list = cur.fetchall()
+                list_tokens = []
+                for user in user_list:
+                    list_tokens.append(user.to_json().get('push_token'))
+
+                return list_tokens
+
+            except Exception as e:
+                response.status = 400
+                return {"error": 'Bad Request.'}
+
+    def list_tokens_from_logins(self, login_list):
+        with self.con:
+            try:
+                cur = self.con.cursor(Model = User)
+                sql = "SELECT * FROM users_app WHERE push_token IS NOT NULL"
+                cur.execute(sql)
+                list_users = cur.fetchall()
+                list_tokens = []
+                mapping_list = dict((user.to_json().get('login'), user.to_json().get('push_token')) for user in list_users)
+                token_list = [mapping_list[login] for login in login_list]
+                for token in token_list:
+                    list_tokens.append(token)
+
+                return list_tokens
+
+            except Exception as e:
+                print(e)
                 response.status = 400
                 return {"error": 'Bad Request.'}
