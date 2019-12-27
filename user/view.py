@@ -57,7 +57,7 @@ class UserView():
                     raise e
                     self.con.rollback()
                 sql = "SELECT * FROM users_app WHERE login=%s"
-                cur.execute(sql, (self.login))
+                cur.execute(sql, self.login)
                 user = cur.fetchone()
 
                 return user.to_json()
@@ -88,7 +88,7 @@ class UserView():
                 token = secrets.token_hex(25)
                 try:
                     sql = "DELETE FROM auth_token WHERE login=%s"
-                    cur.execute(sql, (self.login))
+                    cur.execute(sql, self.login)
                     sql = "INSERT INTO auth_token (login, token) VALUES (%s, %s)"
                     cur.execute(sql, (self.login, token))
                     self.con.commit()
@@ -117,7 +117,7 @@ class UserView():
             try:
                 cur = self.con.cursor(Model= User)
                 sql = "SELECT * FROM users_app WHERE login=%s"
-                cur.execute(sql, (login))
+                cur.execute(sql, login)
                 user = cur.fetchone()
 
                 return user

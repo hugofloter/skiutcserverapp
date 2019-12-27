@@ -76,7 +76,7 @@ class PotinView():
                 sql = "INSERT INTO potin (title, text, approved, sender, isAnonymous) VALUES (%s, %s, %s, %s, %s)"
                 cur.execute(sql, (title, text, approved, sender, isAnonymous))
                 self.con.commit()
-                sql = "SELECT * FROM potin ORDER BY id DESC"
+                sql = "SELECT * FROM potin WHERE id = (SELECT MAX(id) FROM potin)"
                 cur.execute(sql)
                 last = cur.fetchone()
 
@@ -96,7 +96,7 @@ class PotinView():
             with self.con:
                 cur = self.con.cursor(Model = Potin)
                 sql = "DELETE FROM potin WHERE id = %s"
-                cur.execute(sql, (id))
+                cur.execute(sql, id)
                 self.con.commit()
 
                 return self.list()
@@ -114,10 +114,10 @@ class PotinView():
             with self.con:
                 cur = self.con.cursor(Model = Potin)
                 sql = "UPDATE potin SET approved = 1 WHERE id = %s"
-                cur.execute(sql, (id))
+                cur.execute(sql, id)
                 self.con.commit()
 
-                return self.list()
+                return self.list(admin=True)
 
         except Exception as e:
             self.con.rollback()

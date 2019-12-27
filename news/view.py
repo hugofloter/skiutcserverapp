@@ -3,6 +3,7 @@ from db import dbskiutc_con as db
 from utils.errors import Error
 from datetime import datetime
 
+
 class NewsView():
     def __init__(self):
         self.con = db()
@@ -65,7 +66,7 @@ class NewsView():
                 now = now.strftime('%Y-%m-%d %H:%M:%S')
                 cur.execute(sql, (title, text, photo, now, type))
                 self.con.commit()
-                sql = "SELECT * FROM news ORDER BY ID DESC"
+                sql = "SELECT * FROM news WHERE id = (SELECT MAX(id) FROM news)"
                 cur.execute(sql)
                 last = cur.fetchone()
 
@@ -85,7 +86,7 @@ class NewsView():
             with self.con:
                 cur = self.con.cursor(Model = News)
                 sql = "DELETE FROM news WHERE id = %s"
-                cur.execute(sql, (id))
+                cur.execute(sql, id)
                 self.con.commit()
 
                 return self.list()
