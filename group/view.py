@@ -42,11 +42,14 @@ class GroupView():
                 cur = self.con.cursor(Model = Group)
                 sql = "DELETE FROM `groups` WHERE id = %s AND owner=%s"
                 cur.execute(sql, (id_group,  login))
+                if cur.rowcount == 0:
+                    return Error('User unauthorized to delete this group', 403).get_error()
                 self.con.commit()
 
                 return self.list(login)
 
         except Exception as e:
+            print(e)
             self.con.rollback()
             return Error('Problem happened in group deletion', 400).get_error()
 
