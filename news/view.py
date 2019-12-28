@@ -28,7 +28,8 @@ class NewsView():
                 return result
 
         except Exception as e:
-            return e
+            print(e)
+            return Error('Problem happened in query list', 400).get_error()
 
     """
     Return a news given an id
@@ -47,7 +48,8 @@ class NewsView():
                 return response.to_json()
 
         except Exception as e:
-            return e
+            print(e)
+            return Error('Problem happened in query get', 400).get_error()
 
     """
     Create a news given datas model
@@ -75,7 +77,7 @@ class NewsView():
         except Exception as e:
             print(e)
             self.con.rollback()
-            return e
+            return Error('Problem happened in news creation', 400).get_error()
 
     """
     Delete a news given an id
@@ -92,5 +94,6 @@ class NewsView():
                 return self.list()
 
         except Exception as e:
+            print(e)
             self.con.rollback()
-            return e
+            return Error('Problem happened in news deletion', 400).get_error()

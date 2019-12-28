@@ -3,6 +3,7 @@ from bottle import request, response
 from bottle import get, post, delete, put
 from group.view import GroupView
 from utils.middlewares import authenticate, admin
+from utils.errors import Error
 
 
 @get('/groups')
@@ -23,7 +24,6 @@ def create_group(user=None):
     try:
         data = json.loads(request.body.read())
         list_login = data.get('list_login')
-
         return GroupView().create(data, list_login)
 
     except Exception as e:

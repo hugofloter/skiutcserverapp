@@ -1,5 +1,6 @@
 from group.model import Group, UserGroup
 from db import dbskiutc_con as db
+from utils.errors import Error
 
 
 class GroupView():
@@ -29,7 +30,7 @@ class GroupView():
         except Exception as e:
             print(e)
             self.con.rollback()
-            return e
+            return Error('Problem happened in group creation', 400).get_error()
 
     """
     delete a group given id
@@ -47,7 +48,7 @@ class GroupView():
 
         except Exception as e:
             self.con.rollback()
-            return e
+            return Error('Problem happened in group deletion', 400).get_error()
 
     """
     :param id - id of group
@@ -58,24 +59,29 @@ class GroupView():
         result = {}
         count = 0
         # @TODO use Notification here
+        try:
+            with self.con:
+                for login in login_list:
+                    try:
+                        cur = self.con.cursor(Model = UserGroup)
+                        sql = "INSERT INTO `usergroup` (`login_user`, `id_group`) VALUES (%s, %s)"
+                        cur.execute(sql, (login, id_group))
+                        self.con.commit()
+                        sql = "SELECT * FROM `usergroup` WHERE `ìd_group` = %s AND `login_user` = %s"
+                        cur.execute(sql, (id_group, login))
+                        last = cur.fetchone()
+                        result[count] = last
+                        count += 1
 
-        for login in login_list:
-            try:
-                with self.con:
-                    cur = self.con.cursor(Model = UserGroup)
-                    sql = "INSERT INTO `usergroup` (`login_user`, `id_group`) VALUES (%s, %s)"
-                    cur.execute(sql, (login, id_group))
-                    self.con.commit()
-                    sql = "SELECT * FROM `usergroup` WHERE `ìd_group` = %s AND `login_user` = %s"
-                    cur.execute(sql, (id_group, login))
-                    last = cur.fetchone()
-                    result[count] = last
-                    count += 1
+                    except Exception as e:
+                        self.con.rollback()
+                        print(e)
+                        raise e
 
-            except Exception as e:
-                print(e)
-                self.con.rollback()
-                return e
+        except Exception as e:
+            print(e)
+            return Error('Problem happened when adding to group', 400).get_error()
+
         return result
 
     def list_user_from_group(self, id_group):
@@ -95,7 +101,8 @@ class GroupView():
                 return result
 
         except Exception as e:
-            return e
+            print(e)
+            return Error('Problem happened in query list', 400).get_error()
 
     """
     get group from id
@@ -114,7 +121,7 @@ class GroupView():
                 return {'group': response.to_json(), 'list_users': list_users }
 
         except Exception as e:
-            return e
+            return Error('Problem happened in query get', 400).get_error()
 
     """
     get list group from login 
@@ -139,7 +146,8 @@ class GroupView():
                 return result
 
         except Exception as e:
-            return e
+            print(e)
+            return Error('Problem happened in query list', 400).get_error()
 
     """
     remove a user from a group - used when user decide to avoid invitation to group
@@ -155,7 +163,8 @@ class GroupView():
                 return self.list(login)
 
         except Exception as e:
-            return e
+            print(e)
+            return Error('Problem happened in user deletion from group', 400).get_error()
 
     """
     Update a group given an id
@@ -172,8 +181,9 @@ class GroupView():
                 return self.list(login)
 
         except Exception as e:
+            print(e)
             self.con.rollback()
-            return e
+            return Error('Problem happened in updating user status in group group', 400).get_error()
 
     """
     Set a new beer call to group
@@ -191,5 +201,6 @@ class GroupView():
                 return self.get(id_group)
 
         except Exception as e:
+            print(e)
             self.con.rollback()
-            return e
+            return Error('Problem happened in updating user beer call in group', 400).get_error()

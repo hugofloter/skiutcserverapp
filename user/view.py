@@ -33,9 +33,10 @@ class UserView():
                 return new_pwd
 
         except Exception as e:
+            print(e)
             self.con.rollback()
-            response.status = 401
-            return {'error': 'Change password error.'}
+            response.status = 400
+            return Error('Error happened in password reset process').get_error()
 
     def change_password(self, pwd, new_pwd):
         """
@@ -54,8 +55,8 @@ class UserView():
                     cur.execute(sql, (new_pwd, SALT, self.login))
                     self.con.commit()
                 except Exception as e:
-                    raise e
                     self.con.rollback()
+                    raise e
                 sql = "SELECT * FROM users_app WHERE login=%s"
                 cur.execute(sql, self.login)
                 user = cur.fetchone()
@@ -66,8 +67,9 @@ class UserView():
             return e.get_error()
 
         except Exception as e:
-            response.status = 501
-            return e
+            print(e)
+            response.status = 400
+            return Error('Error happened during password change process').get_error()
 
         finally:
             self.con.close()
@@ -84,7 +86,7 @@ class UserView():
                 cur.execute(sql, (self.login, pwd, SALT))
                 user = cur.fetchone()
                 if user is None:
-                    raise Error('Authentication error', 403)
+                    raise Error('Authentication error', 400)
                 token = secrets.token_hex(25)
                 try:
                     sql = "DELETE FROM auth_token WHERE login=%s"
@@ -97,14 +99,15 @@ class UserView():
 
                 except Exception as e:
                     self.con.rollback()
-                    raise Error('Authentication error', 403)
+                    raise Error('Authentication error', 400)
 
         except Error as e:
             return e.get_error()
 
         except Exception as e:
+            print(e)
             response.status = 400
-            return {"error": 'Bad Request'}
+            return Error('Authentication error').get_error()
 
         finally:
             cur.close()
@@ -124,7 +127,7 @@ class UserView():
 
             except Exception as e:
                 print(e)
-                return Error('Bad Request', 400).get_error()
+                return Error('Problem happened in query get', 400).get_error()
 
     def list(self):
         with self.con:
@@ -142,5 +145,6 @@ class UserView():
                 return users_dict
 
             except Exception as e:
+                print(e)
                 response.status = 400
-                return {"error": 'Bad Request.'}
+                return Error('Problem happened in query list').get_error()

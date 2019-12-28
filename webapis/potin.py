@@ -1,9 +1,9 @@
 import json
-
 from bottle import request, response
 from bottle import get, post, delete, put
 from potin.view import PotinView
 from utils.middlewares import authenticate, admin
+from utils.errors import Error
 
 
 @get('/potins')
@@ -13,7 +13,7 @@ def get_potins(user=None):
     try:
         return PotinView().list()
     except Exception as e:
-        return e;
+        return e
 
 
 @get('/potins/<id>')
@@ -34,12 +34,14 @@ def create_potin(user = None):
         data = json.loads(request.body.read())
         data["approved"] = False
         data["sender"] = user.to_json().get("login")
+        if not data.get('title') or not data.get('text'):
+            return Error('Title or text empty', 400).get_error()
 
         return PotinView().create(data)
 
     except Exception as e:
-        print(e)
         return e
+
 
 @delete('/potins/<id>')
 @admin
