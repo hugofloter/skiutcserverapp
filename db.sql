@@ -16,11 +16,13 @@ CREATE TABLE IF NOT EXISTS `auth_token` (
 -- Table structure for table `users_app`
 --
 CREATE TABLE IF NOT EXISTS`users_app` (
-  `login` varchar(40) DEFAULT NULL,
+  `login` varchar(40) PRIMARY KEY,
   `lastname` varchar(40) DEFAULT NULL,
   `firstname` varchar(40) DEFAULT NULL,
   `email` varchar(40) DEFAULT NULL,
-  `password` varbinary(50) DEFAULT NULL
+  `password` varbinary(50) DEFAULT NULL,
+  `isAdmin` Boolean DEFAULT FALSE,
+  `lastPosition` varchar(30) DEFAULT NULL
 );
 
 --
