@@ -3,6 +3,7 @@ from auth_token.model import AuthToken
 from utils.errors import Error
 from user.view import UserView
 
+
 class AuthTokenView():
     def __init__(self):
         self.con = db()
@@ -14,8 +15,8 @@ class AuthTokenView():
         with self.con:
             try:
                 cur = self.con.cursor(Model= AuthToken)
-                sql = "SELECT * FROM auth_token WHERE token=%s";
-                cur.execute(sql, (token))
+                sql = "SELECT * FROM auth_token WHERE token=%s"
+                cur.execute(sql, token)
 
                 authentication = cur.fetchone()
 
