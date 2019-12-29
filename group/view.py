@@ -5,6 +5,7 @@ from utils.errors import Error
 from datetime import datetime
 import pymysql
 
+
 class GroupView():
     def __init__(self):
         self.con = db()
