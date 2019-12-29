@@ -23,7 +23,7 @@ class GroupView():
                 sql = "INSERT INTO `groups` (name, owner) VALUES (%s, %s)"
                 cur.execute(sql, (name, owner))
                 self.con.commit()
-                sql = "SELECT * FROM `groups` ORDER BY id DESC"
+                sql = "SELECT * FROM `groups` WHERE id = (SELECT MAX(id) FROM `groups`)"
                 cur.execute(sql)
                 last = cur.fetchone()
                 self.add_to_group(last.to_json().get('id'), owner=owner)
@@ -72,7 +72,7 @@ class GroupView():
                     sql = "INSERT INTO `usergroup` (`login_user`, `id_group`, `status`) VALUES (%s, %s, %s)"
                     cur.execute(sql, (owner, id_group, 'V'))
                     self.con.commit()
-                    sql = "SELECT * FROM `usergroup` WHERE `id_group` = %s AND `login_user` = %s"
+                    sql = "SELECT * FROM `usergroup` WHERE `id_group` = %s AND `login_user` = %s "
                     cur.execute(sql, (id_group, owner))
                     last = cur.fetchone()
                     result[count] = last.to_json()
