@@ -6,7 +6,10 @@ class User():
         self.email = data[3]
         self.password = data[4]
         self.is_admin = data[5]
-        self.last_position = data[6]
+        self.last_position = {
+            'latitude': data[6],
+            'longitude': data[7]
+        }
 
     def to_json(self):
         return {

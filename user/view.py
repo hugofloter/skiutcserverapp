@@ -45,7 +45,8 @@ class UserView():
         try:
             with self.con:
                 cur = self.con.cursor(Model = User)
-                sql = "SELECT * FROM users_app WHERE login=%s and password=aes_encrypt(%s, %s)"
+                sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
+                      "ST_Y(lastPosition), push_token FROM users_app WHERE login=%s and password=aes_encrypt(%s, %s)"
                 cur.execute(sql, (self.login, pwd, SALT))
                 user = cur.fetchone()
                 if user is None:
@@ -82,7 +83,8 @@ class UserView():
         try:
             with self.con:
                 cur = self.con.cursor(Model = User)
-                sql = "SELECT * FROM users_app WHERE login=%s and password=aes_encrypt(%s, %s)"
+                sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
+                      "ST_Y(lastPosition), push_token FROM users_app WHERE login=%s and password=aes_encrypt(%s, %s)"
                 cur.execute(sql, (self.login, pwd, SALT))
                 user = cur.fetchone()
                 if user is None:
@@ -119,7 +121,8 @@ class UserView():
         with self.con:
             try:
                 cur = self.con.cursor(Model= User)
-                sql = "SELECT * FROM users_app WHERE login=%s"
+                sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
+                      "ST_Y(lastPosition), push_token FROM users_app WHERE login=%s"
                 cur.execute(sql, login)
                 user = cur.fetchone()
 
@@ -133,7 +136,8 @@ class UserView():
         with self.con:
             try:
                 cur = self.con.cursor(Model = User)
-                sql = "Select * from users_app"
+                sql = "Select login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
+                      "ST_Y(lastPosition), push_token from users_app"
                 cur.execute(sql)
                 users = cur.fetchall()
                 users_dict = {}
