@@ -1,11 +1,14 @@
 import json
 import os
+import string
+import random
+
 from bottle import request, response
 from bottle import get, post, delete
 from news.view import NewsView
 from utils.middlewares import authenticate, admin
-
 from config import IMAGES_SOURCE
+
 
 @get('/news')
 @authenticate
@@ -38,6 +41,8 @@ def post_image(user=None):
     category = request.forms.get('category')
     image = request.files.get('image')
 
+    print('category: ', category)
+    print('image: ', image)
     name, ext = os.path.splitext(image.filename)
 
     if ext not in ('.png', '.jpg', '.jpeg'):
@@ -48,7 +53,10 @@ def post_image(user=None):
     if not os.path.exists(save_path):
         os.makedirs(save_path)
 
-    file_path = f"{save_path}/{image.filename}"
+    letters = string.ascii_lowercase
+    file_name = ''.join(random.choice(letters) for i in range(8))
+
+    file_path = f"{save_path}/{file_name}{ext}"
     image.save(file_path)
 
     return { 'img_url': file_path }
