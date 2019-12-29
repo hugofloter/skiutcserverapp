@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS`users_app` (
   `login` varchar(40) PRIMARY KEY,
   `lastname` varchar(40) DEFAULT NULL,
   `firstname` varchar(40) DEFAULT NULL,
-  `email` varchar(40) DEFAULT NULL,
+  `email` varchar(50) DEFAULT NULL,
   `password` varbinary(50) DEFAULT NULL,
   `isAdmin` Boolean DEFAULT FALSE,
   `lastPosition` POINT DEFAULT NULL #Changement of type
@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS`users_app` (
 
 CREATE TABLE IF NOT EXISTS `news` (
   `id` int(10) PRIMARY KEY AUTO_INCREMENT,
-  `title` varchar(20),
+  `title` varchar(50),
   `text` text,
   `photo` varchar(100) DEFAULT NULL,
   `date` DATETIME,
@@ -47,7 +47,7 @@ ALTER TABLE `users_app` DROP PRIMARY KEY, ADD PRIMARY KEY (`login`);
 
 CREATE TABLE IF NOT EXISTS `potin` (
   `id` int(10) PRIMARY KEY AUTO_INCREMENT,
-  `title` varchar(20),
+  `title` varchar(50),
   `text` text,
   `approved` boolean DEFAULT FALSE,
   `sender` varchar(40) NOT NULL,
@@ -57,19 +57,6 @@ CREATE TABLE IF NOT EXISTS `potin` (
     REFERENCES users_app(login)
     ON DELETE CASCADE
 );
-
---
--- Udpate table potin
---
-ALTER TABLE `potin` MODIFY  `title` VARCHAR(50);
-
-
---
--- Update table user
---
-ALTER TABLE `users_app` DROP `isAdmin`, ADD `isAdmin` Boolean DEFAULT 0;
-ALTER TABLE `users_app` DROP `lastPosition`, ADD `lastPosition` varchar(30) DEFAULT NULL;
-ALTER TABLE `users_app` MODIFY `email` VARCHAR(50);
 
 --
 -- Table structure for table `groups`
