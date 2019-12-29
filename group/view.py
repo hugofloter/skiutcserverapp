@@ -262,7 +262,6 @@ class GroupView():
                 sql = "SELECT * from `usergroup` WHERE login_user = %s and id_group = %s"
                 cur.execute(sql, (login, id_group))
                 response = cur.fetchone()
-                print(response.to_json())
                 if response is None:
                     return False
                 return bool(response.to_json().get('share_position'))
@@ -296,7 +295,7 @@ class GroupView():
     :param login
     :param location Location object 
     """
-    def update_location(self, login, location):
+    def update_location(self, login, location, id_group):
         try:
             with self.con:
                 cur = self.con.cursor(Model = User)
@@ -304,7 +303,7 @@ class GroupView():
                 cur.execute(sql, (location.to_json().get('latitude'), location.to_json().get('longitude'), login))
                 self.con.commit()
 
-                return location.to_json()
+                return self.get(id_group)
 
         except Exception as e:
             print(e)
