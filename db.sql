@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS`users_app` (
   `email` varchar(40) DEFAULT NULL,
   `password` varbinary(50) DEFAULT NULL,
   `isAdmin` Boolean DEFAULT FALSE,
-  `lastPosition` varchar(30) DEFAULT NULL
+  `lastPosition` POINT DEFAULT NULL #Changement of type
 );
 
 --
@@ -77,9 +77,9 @@ ALTER TABLE `users_app` MODIFY `email` VARCHAR(50);
 
 CREATE TABLE IF NOT EXISTS `groups` (
   `id` int(10) PRIMARY KEY AUTO_INCREMENT,
-  `name` varchar(20),
+  `name` varchar(40) NOT NULL,
   `owner` varchar(40) NOT NULL,
-  `beer_call` date DEFAULT NULL,
+  `beer_call` DATETIME DEFAULT NULL,
   INDEX owner_index (owner),
   FOREIGN KEY (owner)
     REFERENCES users_app(login)
@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS `groups` (
 --
 
 CREATE TABLE IF NOT EXISTS `usergroup` (
-  `login_user` varchar(20) NOT NULL,
+  `login_user` varchar(40) NOT NULL,
   `id_group` int(10) NOT NULL,
   `status` ENUM('V', 'P') DEFAULT 'P',
   `share_position` boolean DEFAULT FALSE,
@@ -99,5 +99,9 @@ CREATE TABLE IF NOT EXISTS `usergroup` (
   INDEX group_index (id_group),
   FOREIGN KEY (id_group)
     REFERENCES `groups`(id)
-    ON DELETE CASCADE
+    ON DELETE CASCADE,
+  FOREIGN KEY (login_user)
+    REFERENCES `users_app`(login)
+    ON DELETE CASCADE,
+  PRIMARY KEY(login_user, id_group)
 );

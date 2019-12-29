@@ -3,7 +3,10 @@ class Group:
         self.id = data[0]
         self.name = data[1]
         self.owner = data[2]
-        self.beer_call = data[3].strftime("%m-%d-%Y %H:%M:%S")
+        if data[3]:
+            self.beer_call = data[3].strftime("%m-%d-%Y %H:%M:%S")
+        else:
+            self.beer_call = data[3]
 
     def to_json(self):
         return {
@@ -19,8 +22,11 @@ class UserGroup:
         self.login_user = data[0]
         self.id_group = data[1]
         self.status = data[2]
-        self.share_position = data[3],
-        self.expiration_date = data[4]
+        self.share_position = data[3]
+        if data[4]:
+            self.expiration_date = data[4].strftime("%m-%d-%Y %H:%M:%S")
+        else:
+            self.expiration_date = data[4]
 
     def to_json(self):
         return {
@@ -29,4 +35,16 @@ class UserGroup:
             'status': self.status,
             'share_position': self.share_position,
             'expiration_date': self.expiration_date
+        }
+
+
+class Location:
+    def __init__(self, data):
+        self.latitude = data.get('latitude')
+        self.longitude = data.get('longitude')
+
+    def to_json(self):
+        return {
+            'latitude': self.latitude,
+            'longitude': self.longitude
         }

@@ -1,7 +1,9 @@
-from group.model import Group, UserGroup
+from group.model import Group, UserGroup, Location
+from user.model import User
 from db import dbskiutc_con as db
 from utils.errors import Error
-
+from datetime import datetime
+import pymysql
 
 class GroupView():
     def __init__(self):
@@ -9,13 +11,13 @@ class GroupView():
 
     """
     Create a group given datas model
-    :param data
+    :param name > string name of group
+    :param owner >  string user login that created the group
+    :param list_login > array of login to send invitation
     """
-    def create(self, data, list_login):
+    def create(self, name, owner, list_login):
         try:
             with self.con:
-                name = data.get('name')
-                owner = data.get('owner')
                 cur = self.con.cursor(Model = Group)
                 sql = "INSERT INTO `groups` (name, owner) VALUES (%s, %s)"
                 cur.execute(sql, (name, owner))
@@ -23,7 +25,8 @@ class GroupView():
                 sql = "SELECT * FROM `groups` ORDER BY id DESC"
                 cur.execute(sql)
                 last = cur.fetchone()
-                self.add_to_group(last.to_json().get('id'), list_login)
+                self.add_to_group(last.to_json().get('id'), owner=owner)
+                self.add_to_group(last.to_json().get('id'), login_list=list_login)
 
                 return last.to_json()
 
@@ -56,30 +59,46 @@ class GroupView():
     """
     :param id - id of group
     :param loginList list of login to add
-    :return json list of user added to group on usergroup format
+    :return array list of user added to group on usergroup format
     """
-    def add_to_group(self, id_group, login_list):
+    def add_to_group(self, id_group, login_list=None, owner=None):
         result = {}
         count = 0
-        # @TODO use Notification here
         try:
             with self.con:
-                for login in login_list:
-                    try:
-                        cur = self.con.cursor(Model = UserGroup)
-                        sql = "INSERT INTO `usergroup` (`login_user`, `id_group`) VALUES (%s, %s)"
-                        cur.execute(sql, (login, id_group))
-                        self.con.commit()
-                        sql = "SELECT * FROM `usergroup` WHERE `ìd_group` = %s AND `login_user` = %s"
-                        cur.execute(sql, (id_group, login))
-                        last = cur.fetchone()
-                        result[count] = last
-                        count += 1
+                if owner:
+                    cur = self.con.cursor(Model=UserGroup)
+                    sql = "INSERT INTO `usergroup` (`login_user`, `id_group`, `status`) VALUES (%s, %s, %s)"
+                    cur.execute(sql, (owner, id_group, 'V'))
+                    self.con.commit()
+                    sql = "SELECT * FROM `usergroup` WHERE `id_group` = %s AND `login_user` = %s"
+                    cur.execute(sql, (id_group, owner))
+                    last = cur.fetchone()
+                    result[count] = last.to_json()
+                    count += 1
+                if login_list:
+                    for login in login_list:
+                        try:
+                            cur = self.con.cursor(Model=UserGroup)
+                            sql = "INSERT INTO `usergroup` (`login_user`, `id_group`) VALUES (%s, %s)"
+                            cur.execute(sql, (login, id_group))
+                            self.con.commit()
+                            sql = "SELECT * FROM `usergroup` WHERE `id_group` = %s AND `login_user` = %s"
+                            cur.execute(sql, (id_group, login))
+                            last = cur.fetchone()
+                            result[count] = last.to_json()
+                            count += 1
+                            # @TODO use Notification here
 
-                    except Exception as e:
-                        self.con.rollback()
-                        print(e)
-                        raise e
+                        except Exception as e:
+                            print(e)
+                            code, message = e.args
+                            if code == pymysql.constants.ER.DUP_ENTRY:
+                                result[count] = {'error': message}
+                                count += 1
+                            else:
+                                self.con.rollback()
+                                raise e
 
         except Exception as e:
             print(e)
@@ -91,7 +110,7 @@ class GroupView():
         try:
             with self.con:
                 cur = self.con.cursor(Model = UserGroup)
-                sql = "SELECT * from `usergroup` WHERE `ìd_group` = %s"
+                sql = "SELECT * from `usergroup` WHERE `id_group` = %s"
                 cur.execute(sql, id_group)
                 response = cur.fetchall()
                 count = 0
@@ -108,7 +127,7 @@ class GroupView():
             return Error('Problem happened in query list', 400).get_error()
 
     """
-    get group from id
+    get group focus info from id
     """
     def get(self, id_group):
         try:
@@ -119,11 +138,31 @@ class GroupView():
                 response = cur.fetchone()
                 if response is None:
                     return {}
-                list_users = self.list_user_from_group(id_group)
+                list_users = self.merge_user_location(id_group)
 
-                return {'group': response.to_json(), 'list_users': list_users }
+                return {'group': response.to_json(), 'users': list_users}
 
         except Exception as e:
+            print(e)
+            return Error('Problem happened in query get', 400).get_error()
+
+    """
+    get group global info from id
+    """
+    def get_global(self, id_group):
+        try:
+            with self.con:
+                cur = self.con.cursor(Model = Group)
+                sql = "SELECT * from `groups` WHERE id = %s"
+                cur.execute(sql, id_group)
+                response = cur.fetchone()
+                if response is None:
+                    return {}
+
+                return response.to_json()
+
+        except Exception as e:
+            print(e)
             return Error('Problem happened in query get', 400).get_error()
 
     """
@@ -142,7 +181,8 @@ class GroupView():
                 result = {}
                 for u in response:
                     current = u.to_json()
-                    group = self.get(current.get('id'))
+                    group = self.get_global(current.get('id_group'))
+                    group['user_status'] = current.get('status')
                     result[count] = group
                     count += 1
 
@@ -159,7 +199,7 @@ class GroupView():
         try:
             with self.con:
                 cur = self.con.cursor(Model = UserGroup)
-                sql = "DELETE FROM `usergroup` WHERE `ìd_group` = %s AND `login_user` = %S"
+                sql = "DELETE FROM `usergroup` WHERE `id_group` = %s AND `login_user` = %S"
                 cur.execute(sql, (id_group, login))
                 self.con.commit()
 
@@ -177,7 +217,7 @@ class GroupView():
         try:
             with self.con:
                 cur = self.con.cursor(Model = UserGroup)
-                sql = "UPDATE `usergroup` SET status = 'V' WHERE `ìd_group` = %s AND `login_user` = %S"
+                sql = "UPDATE `usergroup` SET status = 'V' WHERE `id_group` = %s AND `login_user` = %s"
                 cur.execute(sql, (id_group, login))
                 self.con.commit()
 
@@ -186,18 +226,20 @@ class GroupView():
         except Exception as e:
             print(e)
             self.con.rollback()
-            return Error('Problem happened in updating user status in group group', 400).get_error()
+            return Error('Problem happened in updating user status in group', 400).get_error()
 
     """
     Set a new beer call to group
     :param id
     """
-    def new_beer_call(self, id_group, new_bee_call):
+    def new_beer_call(self, id_group):
         try:
+            new_beer_call = datetime.now()
+            new_beer_call = new_beer_call.strftime('%Y-%m-%d %H:%M:%S')
             with self.con:
                 cur = self.con.cursor(Model = UserGroup)
                 sql = "UPDATE `groups` SET `beer_call` = %s WHERE id = %s"
-                cur.execute(sql, (id_group, new_bee_call))
+                cur.execute(sql, (new_beer_call, id_group))
                 self.con.commit()
                 #@TODO use Notification here
 
@@ -207,3 +249,100 @@ class GroupView():
             print(e)
             self.con.rollback()
             return Error('Problem happened in updating user beer call in group', 400).get_error()
+
+    """
+    check if user allow location
+    :param
+    """
+    def user_allow_location(self, id_group, login):
+        try:
+            with self.con:
+                cur = self.con.cursor(Model = UserGroup)
+                sql = "SELECT * from `usergroup` WHERE login_user = %s and id_group = %s"
+                cur.execute(sql, (login, id_group))
+                response = cur.fetchone()
+                print(response.to_json())
+                if response is None:
+                    return False
+                return bool(response.to_json().get('share_position'))
+
+        except Exception as e:
+            print(e)
+            return Error('Problem happened in query get', 400).get_error()
+
+    """
+    Update location permission of user
+    :param id_group
+    :param login
+    """
+    def update_permission_location(self, id_group, login, perm):
+        try:
+            with self.con:
+                cur = self.con.cursor(Model = User)
+                sql = "UPDATE `usergroup` SET `share_position` = %s WHERE `login_user` = %s AND `id_group` = %s"
+                cur.execute(sql, (perm, login, id_group))
+                self.con.commit()
+
+                return self.get(id_group)
+
+        except Exception as e:
+            print(e)
+            self.con.rollback()
+            return Error('Problem happened in updating permission location for user', 400).get_error()
+
+    """
+    Update location of user
+    :param login
+    :param location Location object 
+    """
+    def update_location(self, login, location):
+        try:
+            with self.con:
+                cur = self.con.cursor(Model = User)
+                sql = "UPDATE `users_app` SET `lastPosition` = POINT(%s, %s) WHERE login = %s"
+                cur.execute(sql, (location.to_json().get('latitude'), location.to_json().get('longitude'), login))
+                self.con.commit()
+
+                return location.to_json()
+
+        except Exception as e:
+            print(e)
+            self.con.rollback()
+            return Error('Problem happened in updating location for user', 400).get_error()
+
+    """
+    get location of user
+    :param login
+    """
+    def get_location(self, login):
+        try:
+            with self.con:
+                cur = self.con.cursor()
+                sql = "SELECT ST_X(lastPosition), ST_Y(lastPosition) FROM `users_app` WHERE login = %s"
+                cur.execute(sql, login)
+                (x, y) = cur.fetchone()
+                location = Location({'latitude': x, 'longitude': y})
+
+                return location.to_json()
+
+        except Exception as e:
+            print(e)
+            return Error('Problem happened in query get', 400).get_error()
+
+    """
+    list of location by user if allow
+    :param id_group
+    """
+    def merge_user_location(self, id_group):
+        try:
+            list_users_in_group = self.list_user_from_group(id_group)
+            for (n, user) in list_users_in_group.items():
+                if user.get('share_position'):
+                    location = self.get_location(user.get('login_user'))
+                    user['location'] = location
+
+            return list_users_in_group
+
+        except Exception as e:
+            print(e)
+            return Error('Problem happened when merging location', 400).get_error()
