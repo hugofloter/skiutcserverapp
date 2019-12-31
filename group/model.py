@@ -36,15 +36,3 @@ class UserGroup:
             'share_position': self.share_position,
             'expiration_date': self.expiration_date
         }
-
-
-class Location:
-    def __init__(self, data):
-        self.latitude = data.get('latitude')
-        self.longitude = data.get('longitude')
-
-    def to_json(self):
-        return {
-            'latitude': self.latitude,
-            'longitude': self.longitude
-        }

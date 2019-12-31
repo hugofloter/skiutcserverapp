@@ -3,7 +3,7 @@ from bottle import request, response
 from bottle import get, post, delete, put
 from group.view import GroupView
 from utils.middlewares import authenticate, admin
-from group.model import Location
+from user.model import Location
 from utils.errors import Error
 
 

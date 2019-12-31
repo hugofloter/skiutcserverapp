@@ -1,5 +1,6 @@
-from group.model import Group, UserGroup, Location
+from group.model import Group, UserGroup
 from user.model import User
+from user.view import UserView
 from db import dbskiutc_con as db
 from utils.errors import Error
 from datetime import datetime
@@ -22,13 +23,12 @@ class GroupView():
                 cur = self.con.cursor(Model = Group)
                 sql = "INSERT INTO `groups` (name, owner) VALUES (%s, %s)"
                 cur.execute(sql, (name, owner))
-                self.con.commit()
                 sql = "SELECT * FROM `groups` WHERE id = (SELECT MAX(id) FROM `groups`)"
                 cur.execute(sql)
                 last = cur.fetchone()
                 self.add_to_group(last.to_json().get('id'), owner=owner)
                 self.add_to_group(last.to_json().get('id'), login_list=list_login)
-
+                self.con.commit()
                 return last.to_json()
 
         except Exception as e:
@@ -71,7 +71,6 @@ class GroupView():
                     cur = self.con.cursor(Model=UserGroup)
                     sql = "INSERT INTO `usergroup` (`login_user`, `id_group`, `status`) VALUES (%s, %s, %s)"
                     cur.execute(sql, (owner, id_group, 'V'))
-                    self.con.commit()
                     sql = "SELECT * FROM `usergroup` WHERE `id_group` = %s AND `login_user` = %s "
                     cur.execute(sql, (id_group, owner))
                     last = cur.fetchone()
@@ -83,7 +82,6 @@ class GroupView():
                             cur = self.con.cursor(Model=UserGroup)
                             sql = "INSERT INTO `usergroup` (`login_user`, `id_group`) VALUES (%s, %s)"
                             cur.execute(sql, (login, id_group))
-                            self.con.commit()
                             sql = "SELECT * FROM `usergroup` WHERE `id_group` = %s AND `login_user` = %s"
                             cur.execute(sql, (id_group, login))
                             last = cur.fetchone()
@@ -200,7 +198,7 @@ class GroupView():
         try:
             with self.con:
                 cur = self.con.cursor(Model = UserGroup)
-                sql = "DELETE FROM `usergroup` WHERE `id_group` = %s AND `login_user` = %S"
+                sql = "DELETE FROM `usergroup` WHERE `id_group` = %s AND `login_user` = %s"
                 cur.execute(sql, (id_group, login))
                 self.con.commit()
 
@@ -311,25 +309,6 @@ class GroupView():
             return Error('Problem happened in updating location for user', 400).get_error()
 
     """
-    get location of user
-    :param login
-    """
-    def get_location(self, login):
-        try:
-            with self.con:
-                cur = self.con.cursor()
-                sql = "SELECT ST_X(lastPosition), ST_Y(lastPosition) FROM `users_app` WHERE login = %s"
-                cur.execute(sql, login)
-                (x, y) = cur.fetchone()
-                location = Location({'latitude': x, 'longitude': y})
-
-                return location.to_json()
-
-        except Exception as e:
-            print(e)
-            return Error('Problem happened in query get', 400).get_error()
-
-    """
     list of location by user if allow
     :param id_group
     """
@@ -338,7 +317,7 @@ class GroupView():
             list_users_in_group = self.list_user_from_group(id_group)
             for (n, user) in list_users_in_group.items():
                 if user.get('share_position'):
-                    location = self.get_location(user.get('login_user'))
+                    location = UserView(user.get('login_user')).get_location()
                     user['location'] = location
 
             return list_users_in_group

@@ -8,7 +8,7 @@ from config import SALT
 from utils.errors import Error
 import json
 
-from user.model import User
+from user.model import User, Location
 
 
 class UserView():
@@ -152,3 +152,22 @@ class UserView():
                 print(e)
                 response.status = 400
                 return Error('Problem happened in query list').get_error()
+
+    """
+    get location of user
+    :param login
+    """
+    def get_location(self):
+        try:
+            with self.con:
+                cur = self.con.cursor()
+                sql = "SELECT ST_X(lastPosition), ST_Y(lastPosition) FROM `users_app` WHERE login = %s"
+                cur.execute(sql, self.login)
+                (x, y) = cur.fetchone()
+                location = Location({'latitude': x, 'longitude': y})
+
+                return location.to_json()
+
+        except Exception as e:
+            print(e)
+            return Error('Problem happened in query get', 400).get_error()
