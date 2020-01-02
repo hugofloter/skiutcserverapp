@@ -34,7 +34,9 @@ CREATE TABLE IF NOT EXISTS `news` (
   `id` int(10) PRIMARY KEY AUTO_INCREMENT,
   `title` varchar(50),
   `text` text,
-  `photo` varchar(100) DEFAULT NULL,
+  `img_url` varchar(100) DEFAULT NULL,
+  `img_width` int(10) DEFAULT NULL,
+  `img_height` int(10) DEFAULT NULL,
   `date` DATETIME,
   `type` ENUM('news', 'email')
 );
