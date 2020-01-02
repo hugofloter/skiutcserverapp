@@ -2,6 +2,7 @@ from bottle import request, response
 from bottle import post, put, get
 from user.view import UserView
 from utils.middlewares import authenticate
+from utils.errors import Error
 import json
 
 
@@ -17,9 +18,11 @@ def update_user(user = None):
         else:
             pwd = data.get('password')
             new_pwd = data.get('new_password')
-
+            if not pwd or not new_pwd:
+                return Error('passwords empty empty', 400).get_error()
             user = user.to_json()
             return UserView(user['login']).change_password(pwd, new_pwd)
+
     except Exception as e:
         print(e)
         return e
@@ -32,6 +35,8 @@ def authentication():
         data = json.loads(request.body.read())
         login = data.get('login')
         password = data.get('password')
+        if not login or not password:
+            return Error('Login or Password empty', 400).get_error()
         return UserView(login).authenticate(password)
 
     except Exception as e:

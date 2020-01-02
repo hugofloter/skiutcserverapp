@@ -1,5 +1,6 @@
 from db import dbskiutc_con as db
 from potin.model import Potin
+from utils.errors import Error
 
 
 class PotinView():
@@ -34,7 +35,8 @@ class PotinView():
                 return result
 
         except Exception as e:
-            return e
+            print(e)
+            return Error('Problem happen in query list').get_error()
 
     """
     Return a potin given an id
@@ -58,7 +60,8 @@ class PotinView():
                 return potin
 
         except Exception as e:
-            return e
+            print(e)
+            return Error('Problem happen in query get', 400).get_error()
 
     """
     Create a potin given datas model
@@ -85,7 +88,7 @@ class PotinView():
         except Exception as e:
             print(e)
             self.con.rollback()
-            return e
+            return Error('Problem happened in potin creation', 400).get_error()
 
     """
     Delete a potin given an id
@@ -102,8 +105,9 @@ class PotinView():
                 return self.list(admin=True)
 
         except Exception as e:
+            print(e)
             self.con.rollback()
-            return e
+            return Error('Problem happened in potin deletion', 400).get_error()
 
     """
     Update a potin given an id
@@ -120,5 +124,6 @@ class PotinView():
                 return self.get(id)
 
         except Exception as e:
+            print(e)
             self.con.rollback()
-            return e
+            return Error('Problem happened when updating potin', 400).get_error()

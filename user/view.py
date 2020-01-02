@@ -8,7 +8,7 @@ from config import SALT
 from utils.errors import Error
 import json
 
-from user.model import User
+from user.model import User, Location
 
 
 class UserView():
@@ -33,9 +33,10 @@ class UserView():
                 return new_pwd
 
         except Exception as e:
+            print(e)
             self.con.rollback()
-            response.status = 401
-            return {'error': 'Change password error.'}
+            response.status = 400
+            return Error('Error happened in password reset process').get_error()
 
     def change_password(self, pwd, new_pwd):
         """
@@ -44,7 +45,8 @@ class UserView():
         try:
             with self.con:
                 cur = self.con.cursor(Model = User)
-                sql = "SELECT * FROM users_app WHERE login=%s and password=aes_encrypt(%s, %s)"
+                sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
+                      "ST_Y(lastPosition), push_token FROM users_app WHERE login=%s and password=aes_encrypt(%s, %s)"
                 cur.execute(sql, (self.login, pwd, SALT))
                 user = cur.fetchone()
                 if user is None:
@@ -65,8 +67,9 @@ class UserView():
             return e.get_error()
 
         except Exception as e:
-            response.status = 501
-            return e
+            print(e)
+            response.status = 400
+            return Error('Error happened during password change process').get_error()
 
         finally:
             self.con.close()
@@ -79,11 +82,12 @@ class UserView():
         try:
             with self.con:
                 cur = self.con.cursor(Model = User)
-                sql = "SELECT * FROM users_app WHERE login=%s and password=aes_encrypt(%s, %s)"
+                sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
+                      "ST_Y(lastPosition), push_token FROM users_app WHERE login=%s and password=aes_encrypt(%s, %s)"
                 cur.execute(sql, (self.login, pwd, SALT))
                 user = cur.fetchone()
                 if user is None:
-                    raise Error('Authentication error', 403)
+                    raise Error('Authentication error', 400)
                 token = secrets.token_hex(25)
                 try:
                     sql = "DELETE FROM auth_token WHERE login=%s"
@@ -96,14 +100,15 @@ class UserView():
 
                 except Exception as e:
                     self.con.rollback()
-                    raise Error('Authentication error', 403)
+                    raise Error('Authentication error', 400)
 
         except Error as e:
             return e.get_error()
 
         except Exception as e:
+            print(e)
             response.status = 400
-            return {"error": 'Bad Request'}
+            return Error('Authentication error').get_error()
 
         finally:
             cur.close()
@@ -115,7 +120,8 @@ class UserView():
         with self.con:
             try:
                 cur = self.con.cursor(Model= User)
-                sql = "SELECT * FROM users_app WHERE login=%s"
+                sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
+                      "ST_Y(lastPosition), push_token FROM users_app WHERE login=%s"
                 cur.execute(sql, login)
                 user = cur.fetchone()
 
@@ -123,13 +129,14 @@ class UserView():
 
             except Exception as e:
                 print(e)
-                return Error('Bad Request', 400).get_error()
+                return Error('Problem happened in query get', 400).get_error()
 
     def list(self):
         with self.con:
             try:
                 cur = self.con.cursor(Model = User)
-                sql = "Select * from users_app"
+                sql = "Select login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
+                      "ST_Y(lastPosition), push_token from users_app"
                 cur.execute(sql)
                 users = cur.fetchall()
                 users_dict = {}
@@ -141,8 +148,28 @@ class UserView():
                 return users_dict
 
             except Exception as e:
+                print(e)
                 response.status = 400
-                return {"error": 'Bad Request.'}
+                return Error('Problem happened in query list').get_error()
+
+    """
+    get location of user
+    :param login
+    """
+    def get_location(self):
+        try:
+            with self.con:
+                cur = self.con.cursor()
+                sql = "SELECT ST_X(lastPosition), ST_Y(lastPosition) FROM `users_app` WHERE login = %s"
+                cur.execute(sql, self.login)
+                (x, y) = cur.fetchone()
+                location = Location({'latitude': x, 'longitude': y})
+
+                return location.to_json()
+
+        except Exception as e:
+            print(e)
+            return Error('Problem happened in query get', 400).get_error()
 
     def push_token(self, push_token):
         try:
@@ -157,7 +184,8 @@ class UserView():
                     self.con.rollback()
                     raise e
 
-                sql = "SELECT * FROM users_app WHERE login=%s"
+                sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
+                      "ST_Y(lastPosition), push_token FROM users_app WHERE login=%s"
                 cur.execute(sql, self.login)
                 user = cur.fetchone()
 
@@ -168,7 +196,7 @@ class UserView():
 
         except Exception as e:
             response.status = 501
-            return e
+            return Error('Problem happened in adding push token', 501).get_error()
 
         finally:
             self.con.close()
@@ -177,7 +205,8 @@ class UserView():
         with self.con:
             try:
                 cur = self.con.cursor(Model = User)
-                sql = "SELECT * FROM users_app WHERE push_token IS NOT NULL"
+                sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
+                      "ST_Y(lastPosition), push_token FROM users_app WHERE push_token IS NOT NULL"
                 cur.execute(sql)
                 user_list = cur.fetchall()
                 list_tokens = []
@@ -188,13 +217,14 @@ class UserView():
 
             except Exception as e:
                 response.status = 400
-                return {"error": 'Bad Request.'}
+                return Error('Problem happened in query list', 501).get_error()
 
     def list_tokens_from_logins(self, login_list):
         with self.con:
             try:
                 cur = self.con.cursor(Model = User)
-                sql = "SELECT * FROM users_app WHERE push_token IS NOT NULL"
+                sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
+                      "ST_Y(lastPosition), push_token FROM users_app WHERE push_token IS NOT NULL"
                 cur.execute(sql)
                 list_users = cur.fetchall()
                 list_tokens = []
@@ -208,4 +238,4 @@ class UserView():
             except Exception as e:
                 print(e)
                 response.status = 400
-                return {"error": 'Bad Request.'}
+                return Error('Problem happened in query list', 501).get_error()
