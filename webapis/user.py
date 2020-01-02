@@ -8,18 +8,21 @@ import json
 
 @put('/users')
 @authenticate
-def change_password(user = None):
-    """change password user"""
+def update_user(user = None):
     try:
         data = json.loads(request.body.read())
-        pwd = data.get('password')
-        new_pwd = data.get('new_password')
+        if data.get('token'):
+            login = user.to_json().get('login')
+            token = data.get('token')
+            return UserView(login).push_token(token)
+        else:
+            pwd = data.get('password')
+            new_pwd = data.get('new_password')
+            if not pwd or not new_pwd:
+                return Error('passwords empty empty', 400).get_error()
+            user = user.to_json()
+            return UserView(user['login']).change_password(pwd, new_pwd)
 
-        if not pwd or not new_pwd:
-            return Error('passwords empty empty', 400).get_error()
-
-        user = user.to_json()
-        return UserView(user['login']).change_password(pwd, new_pwd)
     except Exception as e:
         print(e)
         return e

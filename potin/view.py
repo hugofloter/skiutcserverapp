@@ -102,7 +102,7 @@ class PotinView():
                 cur.execute(sql, id)
                 self.con.commit()
 
-                return self.list()
+                return self.list(admin=True)
 
         except Exception as e:
             print(e)
@@ -121,7 +121,7 @@ class PotinView():
                 cur.execute(sql, id)
                 self.con.commit()
 
-                return self.list(admin=True)
+                return self.get(id)
 
         except Exception as e:
             print(e)

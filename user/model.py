@@ -10,6 +10,7 @@ class User():
             'latitude': data[6],
             'longitude': data[7]
         }
+        self.push_token = data[8]
 
     def to_json(self):
         return {
@@ -19,6 +20,7 @@ class User():
             'email': self.email,
             'isAdmin': self.is_admin,
             'lastPosition': self.last_position,
+            'push_token': self.push_token
         }
 
 

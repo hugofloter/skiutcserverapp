@@ -20,9 +20,10 @@ CREATE TABLE IF NOT EXISTS`users_app` (
   `lastname` varchar(40) DEFAULT NULL,
   `firstname` varchar(40) DEFAULT NULL,
   `email` varchar(50) DEFAULT NULL,
-  `password` varbinary(50) DEFAULT NULL,
   `isAdmin` Boolean DEFAULT FALSE,
-  `lastPosition` POINT DEFAULT NULL #Changement of type
+  `lastPosition` POINT DEFAULT NULL, #Changement of type
+  `password` varbinary(50) DEFAULT NULL,
+  `push_token` varchar(250) DEFAULT NULL #new column
 );
 
 --
@@ -42,8 +43,6 @@ CREATE TABLE IF NOT EXISTS `news` (
 --
 -- Table structure for table `potin`
 --
-
-ALTER TABLE `users_app` DROP PRIMARY KEY, ADD PRIMARY KEY (`login`);
 
 CREATE TABLE IF NOT EXISTS `potin` (
   `id` int(10) PRIMARY KEY AUTO_INCREMENT,
