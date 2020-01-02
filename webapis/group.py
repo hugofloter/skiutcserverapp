@@ -38,7 +38,7 @@ def create_group(user=None):
 @get('/groups/<id>')
 @authenticate
 def get_group_infos(id, user=None):
-    """get groups and list users from login"""
+    """get group and list users from id group"""
     try:
         return GroupView().get(id)
 

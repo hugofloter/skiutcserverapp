@@ -139,7 +139,10 @@ class GroupView():
                     return {}
                 list_users = self.merge_user_location(id_group)
 
-                return {'group': response.to_json(), 'users': list_users}
+                group = response.to_json()
+                group['users'] = list_users
+
+                return group
 
         except Exception as e:
             print(e)
