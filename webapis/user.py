@@ -4,20 +4,26 @@ from user.view import UserView
 from utils.middlewares import authenticate
 import json
 
+
 @put('/users')
 @authenticate
-def change_password(user = None):
-    """change password user"""
+def update_user(user = None):
     try:
         data = json.loads(request.body.read())
-        pwd = data.get('password')
-        new_pwd = data.get('new_password')
+        if data.get('token'):
+            login = user.to_json().get('login')
+            token = data.get('token')
+            return UserView(login).push_token(token)
+        else:
+            pwd = data.get('password')
+            new_pwd = data.get('new_password')
 
-        user = user.to_json()
-        return UserView(user['login']).change_password(pwd, new_pwd)
+            user = user.to_json()
+            return UserView(user['login']).change_password(pwd, new_pwd)
     except Exception as e:
         print(e)
         return e
+
 
 @post('/authenticate')
 def authentication():

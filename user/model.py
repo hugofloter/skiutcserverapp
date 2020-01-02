@@ -7,6 +7,7 @@ class User():
         self.password = data[4]
         self.is_admin = data[5]
         self.last_position = data[6]
+        self.push_token = data[7]
 
     def to_json(self):
         return {
@@ -16,4 +17,5 @@ class User():
             'email': self.email,
             'isAdmin': self.is_admin,
             'lastPosition': self.last_position,
+            'push_token': self.push_token
         }

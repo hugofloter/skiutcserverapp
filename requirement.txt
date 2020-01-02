@@ -1,3 +1,4 @@
 bottle==0.12.18
 pymysql==0.9.3
 requests==2.22.0
+exponent_server_sdk==0.3.1
