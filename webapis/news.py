@@ -8,6 +8,7 @@ from bottle import get, post, delete
 from news.view import NewsView
 from utils.middlewares import authenticate, admin
 from config import IMAGES_SOURCE
+from utils.errors import Error
 
 
 @get('/news')
@@ -68,10 +69,10 @@ def create_news(user = None):
     """create a news"""
     try:
         data = json.loads(request.body.read())
-
+        if not data.get('title') or not data.get('text'):
+            return Error('Title or text empty', 400).get_error()
         return NewsView().create(data)
     except Exception as e:
-        print(e)
         return e
 
 

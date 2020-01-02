@@ -14,7 +14,7 @@ def authenticate(f):
     def wrapper(*args, **kwargs):
         auth = request.headers.get('Authorization')
         if auth is None:
-            return Error('Not Logged', 403).get_error()
+            return Error('Not Logged', 401).get_error()
         user = AuthTokenView().get(auth)
 
         if isinstance(user, dict):
@@ -33,7 +33,7 @@ def admin(f):
     def wrapper(*args, **kwargs):
         auth = request.headers.get('Authorization')
         if auth is None:
-            return Error('Not Logged', 403).get_error()
+            return Error('Not Logged', 401).get_error()
         user = AuthTokenView().get(auth)
 
         if isinstance(user, dict):

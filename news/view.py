@@ -2,6 +2,11 @@ from news.model import News
 from db import dbskiutc_con as db
 from utils.errors import Error
 from datetime import datetime
+from user.view import UserView
+from notifications.view import NotificationsView
+from notifications.model import NotificationMessage
+
+
 
 class NewsView():
     def __init__(self):
@@ -27,7 +32,8 @@ class NewsView():
                 return result
 
         except Exception as e:
-            return e
+            print(e)
+            return Error('Problem happened in query list', 400).get_error()
 
     """
     Return a news given an id
@@ -46,7 +52,8 @@ class NewsView():
                 return response.to_json()
 
         except Exception as e:
-            return e
+            print(e)
+            return Error('Problem happened in query get', 400).get_error()
 
     """
     Create a news given datas model
@@ -65,16 +72,19 @@ class NewsView():
                 now = now.strftime('%Y-%m-%d %H:%M:%S')
                 cur.execute(sql, (title, text, photo, now, type))
                 self.con.commit()
-                sql = "SELECT * FROM news ORDER BY ID DESC"
+                sql = "SELECT * FROM news WHERE id = (SELECT MAX(id) FROM news)"
                 cur.execute(sql)
                 last = cur.fetchone()
+                tokens = UserView().list_tokens()
+                message = NotificationMessage(data)
+                NotificationsView(message, tokens).send_push_message()
 
                 return last.to_json()
 
         except Exception as e:
             print(e)
             self.con.rollback()
-            return e
+            return Error('Problem happened in news creation', 400).get_error()
 
     """
     Delete a news given an id
@@ -85,11 +95,12 @@ class NewsView():
             with self.con:
                 cur = self.con.cursor(Model = News)
                 sql = "DELETE FROM news WHERE id = %s"
-                cur.execute(sql, (id))
+                cur.execute(sql, id)
                 self.con.commit()
 
                 return self.list()
 
         except Exception as e:
+            print(e)
             self.con.rollback()
-            return e
+            return Error('Problem happened in news deletion', 400).get_error()

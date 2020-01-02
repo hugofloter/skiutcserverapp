@@ -19,10 +19,11 @@ CREATE TABLE IF NOT EXISTS`users_app` (
   `login` varchar(40) PRIMARY KEY,
   `lastname` varchar(40) DEFAULT NULL,
   `firstname` varchar(40) DEFAULT NULL,
-  `email` varchar(40) DEFAULT NULL,
-  `password` varbinary(50) DEFAULT NULL,
+  `email` varchar(50) DEFAULT NULL,
   `isAdmin` Boolean DEFAULT FALSE,
-  `lastPosition` varchar(30) DEFAULT NULL
+  `lastPosition` POINT DEFAULT NULL, #Changement of type
+  `password` varbinary(50) DEFAULT NULL,
+  `push_token` varchar(250) DEFAULT NULL #new column
 );
 
 --
@@ -31,7 +32,7 @@ CREATE TABLE IF NOT EXISTS`users_app` (
 
 CREATE TABLE IF NOT EXISTS `news` (
   `id` int(10) PRIMARY KEY AUTO_INCREMENT,
-  `title` varchar(20),
+  `title` varchar(50),
   `text` text,
   `photo` varchar(100) DEFAULT NULL,
   `date` DATETIME,
@@ -43,11 +44,9 @@ CREATE TABLE IF NOT EXISTS `news` (
 -- Table structure for table `potin`
 --
 
-ALTER TABLE `users_app` DROP PRIMARY KEY, ADD PRIMARY KEY (`login`);
-
 CREATE TABLE IF NOT EXISTS `potin` (
   `id` int(10) PRIMARY KEY AUTO_INCREMENT,
-  `title` varchar(20),
+  `title` varchar(50),
   `text` text,
   `approved` boolean DEFAULT FALSE,
   `sender` varchar(40) NOT NULL,
@@ -59,14 +58,36 @@ CREATE TABLE IF NOT EXISTS `potin` (
 );
 
 --
--- Udpate table potin
+-- Table structure for table `groups`
 --
-ALTER TABLE `potin` MODIFY  `title` VARCHAR(50);
 
+CREATE TABLE IF NOT EXISTS `groups` (
+  `id` int(10) PRIMARY KEY AUTO_INCREMENT,
+  `name` varchar(40) NOT NULL,
+  `owner` varchar(40) NOT NULL,
+  `beer_call` DATETIME DEFAULT NULL,
+  INDEX owner_index (owner),
+  FOREIGN KEY (owner)
+    REFERENCES users_app(login)
+    ON DELETE CASCADE
+);
 
 --
--- Update table user
+-- Table structure for table `usergroup`
 --
-ALTER TABLE `users_app` DROP `isAdmin`, ADD `isAdmin` Boolean DEFAULT 0;
-ALTER TABLE `users_app` DROP `lastPosition`, ADD `lastPosition` varchar(30) DEFAULT NULL;
-ALTER TABLE `users_app` MODIFY `email` VARCHAR(50);
+
+CREATE TABLE IF NOT EXISTS `usergroup` (
+  `login_user` varchar(40) NOT NULL,
+  `id_group` int(10) NOT NULL,
+  `status` ENUM('V', 'P') DEFAULT 'P',
+  `share_position` boolean DEFAULT FALSE,
+  `expiration_date` date DEFAULT NULL,
+  INDEX group_index (id_group),
+  FOREIGN KEY (id_group)
+    REFERENCES `groups`(id)
+    ON DELETE CASCADE,
+  FOREIGN KEY (login_user)
+    REFERENCES `users_app`(login)
+    ON DELETE CASCADE,
+  PRIMARY KEY(login_user, id_group)
+);

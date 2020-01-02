@@ -1,5 +1,6 @@
 from db import dbskiutc_con as db
 from potin.model import Potin
+from utils.errors import Error
 
 
 class PotinView():
@@ -34,7 +35,8 @@ class PotinView():
                 return result
 
         except Exception as e:
-            return e
+            print(e)
+            return Error('Problem happen in query list').get_error()
 
     """
     Return a potin given an id
@@ -58,7 +60,8 @@ class PotinView():
                 return potin
 
         except Exception as e:
-            return e
+            print(e)
+            return Error('Problem happen in query get', 400).get_error()
 
     """
     Create a potin given datas model
@@ -76,7 +79,7 @@ class PotinView():
                 sql = "INSERT INTO potin (title, text, approved, sender, isAnonymous) VALUES (%s, %s, %s, %s, %s)"
                 cur.execute(sql, (title, text, approved, sender, isAnonymous))
                 self.con.commit()
-                sql = "SELECT * FROM potin ORDER BY id DESC"
+                sql = "SELECT * FROM potin WHERE id = (SELECT MAX(id) FROM potin)"
                 cur.execute(sql)
                 last = cur.fetchone()
 
@@ -85,7 +88,7 @@ class PotinView():
         except Exception as e:
             print(e)
             self.con.rollback()
-            return e
+            return Error('Problem happened in potin creation', 400).get_error()
 
     """
     Delete a potin given an id
@@ -96,14 +99,15 @@ class PotinView():
             with self.con:
                 cur = self.con.cursor(Model = Potin)
                 sql = "DELETE FROM potin WHERE id = %s"
-                cur.execute(sql, (id))
+                cur.execute(sql, id)
                 self.con.commit()
 
-                return self.list()
+                return self.list(admin=True)
 
         except Exception as e:
+            print(e)
             self.con.rollback()
-            return e
+            return Error('Problem happened in potin deletion', 400).get_error()
 
     """
     Update a potin given an id
@@ -114,11 +118,12 @@ class PotinView():
             with self.con:
                 cur = self.con.cursor(Model = Potin)
                 sql = "UPDATE potin SET approved = 1 WHERE id = %s"
-                cur.execute(sql, (id))
+                cur.execute(sql, id)
                 self.con.commit()
 
-                return self.list()
+                return self.get(id)
 
         except Exception as e:
+            print(e)
             self.con.rollback()
-            return e
+            return Error('Problem happened when updating potin', 400).get_error()

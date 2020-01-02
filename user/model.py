@@ -6,7 +6,11 @@ class User():
         self.email = data[3]
         self.password = data[4]
         self.is_admin = data[5]
-        self.last_position = data[6]
+        self.last_position = {
+            'latitude': data[6],
+            'longitude': data[7]
+        }
+        self.push_token = data[8]
 
     def to_json(self):
         return {
@@ -16,4 +20,17 @@ class User():
             'email': self.email,
             'isAdmin': self.is_admin,
             'lastPosition': self.last_position,
+            'push_token': self.push_token
+        }
+
+
+class Location:
+    def __init__(self, data):
+        self.latitude = data.get('latitude')
+        self.longitude = data.get('longitude')
+
+    def to_json(self):
+        return {
+            'latitude': self.latitude,
+            'longitude': self.longitude
         }
