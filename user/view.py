@@ -184,7 +184,8 @@ class UserView():
                     self.con.rollback()
                     raise e
 
-                sql = "SELECT * FROM users_app WHERE login=%s"
+                sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
+                      "ST_Y(lastPosition), push_token FROM users_app WHERE login=%s"
                 cur.execute(sql, self.login)
                 user = cur.fetchone()
 
@@ -204,7 +205,8 @@ class UserView():
         with self.con:
             try:
                 cur = self.con.cursor(Model = User)
-                sql = "SELECT * FROM users_app WHERE push_token IS NOT NULL"
+                sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
+                      "ST_Y(lastPosition), push_token FROM users_app WHERE push_token IS NOT NULL"
                 cur.execute(sql)
                 user_list = cur.fetchall()
                 list_tokens = []
@@ -221,7 +223,8 @@ class UserView():
         with self.con:
             try:
                 cur = self.con.cursor(Model = User)
-                sql = "SELECT * FROM users_app WHERE push_token IS NOT NULL"
+                sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
+                      "ST_Y(lastPosition), push_token FROM users_app WHERE push_token IS NOT NULL"
                 cur.execute(sql)
                 list_users = cur.fetchall()
                 list_tokens = []

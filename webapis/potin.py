@@ -43,7 +43,7 @@ def create_potin(user = None):
         return e
 
 
-@delete('/potins/<id>')
+@delete('/potins/admin/<id>')
 @admin
 def delete_potin(id, user=None):
     """delete a potin"""
@@ -63,7 +63,7 @@ def get_unapproved_potin(user=None):
         return e
 
 
-@put('/potins/<id>')
+@put('/potins/admin/<id>')
 @admin
 def update_potin(id, user=None):
     """update a potin and set to approved"""
