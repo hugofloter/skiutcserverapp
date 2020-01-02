@@ -9,6 +9,7 @@ from news.view import NewsView
 from utils.middlewares import authenticate, admin
 from config import IMAGES_SOURCE
 from utils.errors import Error
+from utils.savefile import savefile
 
 
 @get('/news')
@@ -39,28 +40,10 @@ def post_image(user=None):
     @param image > type file
     @header[Content-Type] : multipart/form-data
     """
-    category = request.forms.get('category')
+    category = 'news'
     image = request.files.get('image')
 
-    print('category: ', category)
-    print('image: ', image)
-    name, ext = os.path.splitext(image.filename)
-
-    if ext not in ('.png', '.jpg', '.jpeg'):
-        response.status = 400
-        return { "Error": "File extension not allowed." }
-
-    save_path = f"{IMAGES_SOURCE}/{category}"
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
-
-    letters = string.ascii_lowercase
-    file_name = ''.join(random.choice(letters) for i in range(8))
-
-    file_path = f"{save_path}/{file_name}{ext}"
-    image.save(file_path)
-
-    return { 'img_url': file_path }
+    return savefile(image, category)
 
 
 @post('/news')
@@ -69,6 +52,7 @@ def create_news(user = None):
     """create a news"""
     try:
         data = json.loads(request.body.read())
+        print(data)
         if not data.get('title') or not data.get('text'):
             return Error('Title or text empty', 400).get_error()
         return NewsView().create(data)
