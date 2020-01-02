@@ -52,7 +52,6 @@ def create_news(user = None):
     """create a news"""
     try:
         data = json.loads(request.body.read())
-        print(data)
         if not data.get('title') or not data.get('text'):
             return Error('Title or text empty', 400).get_error()
         return NewsView().create(data)
