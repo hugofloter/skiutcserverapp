@@ -6,7 +6,7 @@ class Group:
         if data[3]:
             self.beer_call = data[3].strftime("%m-%d-%Y %H:%M:%S")
         else:
-            self.beer_call = data[3]
+            self.beer_call = None
 
     def to_json(self):
         return {
@@ -26,7 +26,7 @@ class UserGroup:
         if data[4]:
             self.expiration_date = data[4].strftime("%m-%d-%Y %H:%M:%S")
         else:
-            self.expiration_date = data[4]
+            self.expiration_date = None
 
     def to_json(self):
         return {
