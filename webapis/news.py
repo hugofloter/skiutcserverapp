@@ -31,6 +31,7 @@ def get_one_news(id, user=None):
     except Exception as e:
         return e
 
+
 @post('/news/image')
 @admin
 def post_image(user=None):
