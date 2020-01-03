@@ -58,7 +58,8 @@ class UserView():
                 except Exception as e:
                     self.con.rollback()
                     raise e
-                sql = "SELECT * FROM users_app WHERE login=%s"
+                sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
+                      "ST_Y(lastPosition), push_token FROM users_app WHERE login=%s"
                 cur.execute(sql, self.login)
                 user = cur.fetchone()
                 return user.to_json()
