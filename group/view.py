@@ -215,15 +215,26 @@ class GroupView():
     Update a group given an id
     :param id
     """
-    def accept_group(self, id_group, login):
+    def handle_invitation(self, id_group, login, invitation_type):
         try:
-            with self.con:
-                cur = self.con.cursor(Model = UserGroup)
-                sql = "UPDATE `usergroup` SET status = 'V' WHERE `id_group` = %s AND `login_user` = %s"
-                cur.execute(sql, (id_group, login))
-                self.con.commit()
+            if invitation_type == 'V':
+                with self.con:
+                    cur = self.con.cursor(Model = UserGroup)
+                    sql = "UPDATE `usergroup` SET status = 'V' WHERE `id_group` = %s AND `login_user` = %s"
+                    cur.execute(sql, (id_group, login))
+                    self.con.commit()
+                    group = self.get_global(id_group)
+                    group['user_status'] = 'V'
 
-                return self.list(login)
+                    return group
+            else:
+                with self.con:
+                    cur = self.con.cursor(Model=UserGroup)
+                    sql = "DELETE FROM `usergroup` WHERE `id_group` = %s AND `login_user` = %s"
+                    cur.execute(sql, (id_group, login))
+                    self.con.commit()
+
+                    return self.list(login)
 
         except Exception as e:
             print(e)

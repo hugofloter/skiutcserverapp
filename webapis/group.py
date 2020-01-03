@@ -51,8 +51,13 @@ def get_group_infos(id, user=None):
 def delete_group(id, user=None):
     """deletes a group if owner"""
     try:
+        data = json.loads(request.body.read())
         login = user.to_json().get('login')
-        return GroupView().delete(id, login)
+        if data.get('invitation'):
+            invitation_type = data.get('invitation')
+            return GroupView().handle_invitation(id, login, invitation_type)
+        if data.get('delete'):
+            return GroupView().delete(id, login)
 
     except Exception as e:
         return e
@@ -81,7 +86,8 @@ def update_group(id, user=None):
         data = json.loads(request.body.read())
         login = user.to_json().get('login')
         if data.get('invitation'):
-            return GroupView().accept_group(id, login)
+            invitation_type = data.get('invitation')
+            return GroupView().handle_invitation(id, login, invitation_type)
         if data.get('beer_call'):
             return GroupView().new_beer_call(id)
         if data.get('location_permission'):

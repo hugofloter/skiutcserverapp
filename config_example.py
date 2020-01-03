@@ -5,3 +5,5 @@ DB_PWD = ""
 
 API_PORT = ""
 SALT = ""
+
+IMAGES_SOURCE = ""

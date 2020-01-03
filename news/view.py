@@ -64,13 +64,15 @@ class NewsView():
             with self.con:
                 title = data.get('title')
                 text = data.get('text')
-                photo = data.get('photo')
+                img_url = data.get('img_url')
+                img_width = data.get('img_width')
+                img_height = data.get('img_height')
                 type = data.get('type')
                 cur = self.con.cursor(Model = News)
-                sql = "INSERT INTO news (title, text, photo, date, type) VALUES (%s, %s, %s, %s, %s)"
+                sql = "INSERT INTO news (title, text, img_url, img_width, img_height, date, type) VALUES (%s, %s, %s, %s, %s, %s, %s)"
                 now = datetime.now()
                 now = now.strftime('%Y-%m-%d %H:%M:%S')
-                cur.execute(sql, (title, text, photo, now, type))
+                cur.execute(sql, (title, text, img_url, img_width, img_height, now, type))
                 self.con.commit()
                 sql = "SELECT * FROM news WHERE id = (SELECT MAX(id) FROM news)"
                 cur.execute(sql)

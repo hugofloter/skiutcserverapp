@@ -1,9 +1,15 @@
 import json
+import os
+import string
+import random
+
 from bottle import request, response
 from bottle import get, post, delete
 from news.view import NewsView
 from utils.middlewares import authenticate, admin
+from config import IMAGES_SOURCE
 from utils.errors import Error
+from utils.savefile import savefile
 
 
 @get('/news')
@@ -24,6 +30,21 @@ def get_one_news(id, user=None):
         return NewsView().get(id)
     except Exception as e:
         return e
+
+
+@post('/news/image')
+@admin
+def post_image(user=None):
+    """
+    upload the image on the server
+    @param category > type text
+    @param image > type file
+    @header[Content-Type] : multipart/form-data
+    """
+    category = 'news'
+    image = request.files.get('image')
+
+    return savefile(image, category)
 
 
 @post('/news')
