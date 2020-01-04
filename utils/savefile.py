@@ -5,6 +5,7 @@ import random
 from config import IMAGES_SOURCE
 from utils.errors import Error
 
+
 def savefile(file, category):
     name, ext = os.path.splitext(file.filename)
 

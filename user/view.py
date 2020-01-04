@@ -240,3 +240,20 @@ class UserView():
                 print(e)
                 response.status = 400
                 return Error('Problem happened in query list', 501).get_error()
+
+    def autocomplete(self, query):
+        try:
+            with self.con:
+                cur = self.con.cursor()
+                sql = "SELECT login, firstname, lastname FROM users_app WHERE firstname LIKE %s OR lastname LIKE %s OR login LIKE %s LIMIT 5"
+                cur.execute(sql, ('%' + query + '%', '%' + query + '%', '%' + query + '%'))
+                list_users = cur.fetchall()
+                desc = cur.description
+                result = {nb_user: {desc[index][0]: attr for index, attr in enumerate(user)} for nb_user, user in enumerate(list_users)}
+
+                return result
+
+        except Exception as e:
+            print(e)
+            response.status = 400
+            return Error('Problem happened in query list', 501).get_error()
