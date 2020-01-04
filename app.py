@@ -1,7 +1,6 @@
 from bottle import run, get, hook, response, route, get, static_file, request
 from config import API_PORT, IMAGES_SOURCE
 from utils.middlewares import authenticate
-from user.view import UserView
 from webapis import user, news, potin, group
 
 
@@ -23,15 +22,6 @@ def get_image(path=None):
     if not path:
         return
     return static_file(path, root=IMAGES_SOURCE)
-
-
-@get('/autocomplete')
-@authenticate
-def autocomplete(user=None):
-    try:
-        return UserView().autocomplete(request.query.get('query'))
-    except Exception as e:
-        print(e)
 
 
 if __name__=='__main__':
