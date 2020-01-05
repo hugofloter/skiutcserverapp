@@ -9,21 +9,21 @@ import json
 @put('/users')
 @authenticate
 def update_user(user = None):
-    login = user.to_json().get('login')
     try:
+        login = user.to_json().get('login')
         data = json.loads(request.body.read())
+
         if data.get('token'):
             token = data.get('token')
             return UserView(login).push_token(token)
         if data.get('location'):
             location = data.get('location')
             return UserView(login).update_location(location)
-        else:
-            pwd = data.get('password')
-            new_pwd = data.get('new_password')
-            if not pwd or not new_pwd:
-                return Error('passwords empty empty', 400).get_error()
-            return UserView(login).change_password(pwd, new_pwd)
+        pwd = data.get('password')
+        new_pwd = data.get('new_password')
+        if not pwd or not new_pwd:
+            return Error('passwords empty empty', 400).get_error()
+        return UserView(login).change_password(pwd, new_pwd)
 
     except Exception as e:
         print(e)
@@ -37,6 +37,11 @@ def authentication():
         data = json.loads(request.body.read())
         login = data.get('login')
         password = data.get('password')
+        token = data.get('token')
+
+        if token:
+            return UserView().authenticate_by_token(token)
+
         if not login or not password:
             return Error('Login or Password empty', 400).get_error()
         return UserView(login).authenticate(password)

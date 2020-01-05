@@ -20,9 +20,20 @@ class User():
             'email': self.email,
             'isAdmin': self.is_admin,
             'lastPosition': self.last_position,
-            'push_token': self.push_token
         }
 
+    def get_push_token(self):
+        return self.push_token
+
+    def to_located_json(self):
+        return {
+            'login': self.login,
+            'lastname': self.lastname,
+            'firstname': self.firstname,
+            'email': self.email,
+            'isAdmin': self.is_admin,
+            'lastPosition': self.last_position,
+        }
 
 class Location:
     def __init__(self, data):
