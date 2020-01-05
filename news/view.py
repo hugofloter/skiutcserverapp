@@ -5,7 +5,7 @@ from datetime import datetime
 from user.view import UserView
 from notifications.view import NotificationsView
 from notifications.model import NotificationMessage
-
+from utils.mail import Mail
 
 
 class NewsView():
@@ -80,6 +80,8 @@ class NewsView():
                 tokens = UserView().list_tokens()
                 message = NotificationMessage(data)
                 NotificationsView(message, tokens).send_push_message()
+                if type == 'email':
+                    Mail().massive_mail_sender()
 
                 return last.to_json()
 

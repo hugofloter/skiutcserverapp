@@ -6,8 +6,7 @@ from db import dbskiutc_con as db
 from bottle import response
 from config import SALT
 from utils.errors import Error
-import json
-
+from utils.mail import Mail
 from user.model import User, Location
 
 
@@ -29,7 +28,19 @@ class UserView():
                 sql = "UPDATE users_app SET password=aes_encrypt(%s, %s) WHERE login=%s;"
                 cur.execute(sql, (new_pwd, SALT, self.login))
                 self.con.commit()
-                #@TODO Here we have to send the the new password to the email.
+                email = self.get(self.login).to_json().get('email')
+                msg = """
+                Salut, participant.e à l'édition 2020 de SKI'UTC. Comme tu as pu le constater, cette année, <br>
+                De la nouveauté cette année : une application SKI'UTC rien que pour toi, rien que pour vous ! <br>
+                <br>
+                Cours l'installer sur le store de ton téléphone (recherches SKI'UTC) <br>
+                <br>                
+                Pour te connecter c'est simple : tu utilises ton login (ou email si tu es tremplin), et tu utilises ces codes : 
+                <br><br>
+                <B>IDENTIFIANT : {}</B><br>
+                <B>PASSWORD : {}</B><br>
+                """.format(self.login, new_pwd)
+                Mail().mail_sender(email, "Ton mot de passe pour l'application SKI'UTC", msg)
                 return new_pwd
 
         except Exception as e:
