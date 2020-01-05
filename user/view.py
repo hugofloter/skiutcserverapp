@@ -173,6 +173,27 @@ class UserView():
             print(e)
             return Error('Problem happened in query get', 400).get_error()
 
+    """
+    Update location
+    :param latitude
+    : param longitude
+    """
+    def update_location(self, location):
+        try:
+            latitude = location.get('latitude')
+            longitude = location.get('longitude')
+            with self.con:
+                cur = self.con.cursor(Model=User)
+                sql = "UPDATE `users_app` SET `lastPosition`= POINT(%s, %s) WHERE login = %s"
+                cur.execute(sql, (latitude, longitude, self.login))
+                self.con.commit()
+
+                return self.get().to_json()
+        except Exception as e:
+            print(e)
+            self.con.rollback()
+            return Error('Problem happened in updating location for user', 400).get_error()
+
     def push_token(self, push_token):
         try:
             with self.con:
