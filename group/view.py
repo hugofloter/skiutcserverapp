@@ -168,7 +168,7 @@ class GroupView():
             return Error('Problem happened in query get', 400).get_error()
 
     """
-    get list group from login 
+    get list group from login
     """
     def list(self, login):
         try:
@@ -301,26 +301,6 @@ class GroupView():
             print(e)
             self.con.rollback()
             return Error('Problem happened in updating permission location for user', 400).get_error()
-
-    """
-    Update location of user
-    :param login
-    :param location Location object 
-    """
-    def update_location(self, login, location, id_group):
-        try:
-            with self.con:
-                cur = self.con.cursor(Model = User)
-                sql = "UPDATE `users_app` SET `lastPosition` = POINT(%s, %s) WHERE login = %s"
-                cur.execute(sql, (location.to_json().get('latitude'), location.to_json().get('longitude'), login))
-                self.con.commit()
-
-                return self.get(id_group)
-
-        except Exception as e:
-            print(e)
-            self.con.rollback()
-            return Error('Problem happened in updating location for user', 400).get_error()
 
     """
     list of location by user if allow

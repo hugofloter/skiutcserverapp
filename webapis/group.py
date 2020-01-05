@@ -93,15 +93,5 @@ def update_group(id, user=None):
         if data.get('location_permission'):
             permission = bool(data.get('location_permission'))
             return GroupView().update_permission_location(id, login, permission)
-        if data.get('location_sent'):
-            try:
-                location = Location(data.get('location_sent'))
-            except Error as e:
-                return Error('Wrong location attribute', 400)
-            if GroupView().user_allow_location(id, user.to_json().get('login')):
-                return GroupView().update_location(user.to_json().get('login'), location, id)
-            else:
-                return Error('User do not allow location', 403)
-
     except Exception as e:
         return e
