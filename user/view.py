@@ -116,6 +116,27 @@ class UserView():
             cur.close()
             self.con.close()
 
+    def authenticate_by_token(self, token):
+        """
+        check the token to find the connected user
+        """
+        try:
+            with self.con:
+                cur = self.con.cursor(Model=User)
+                sql = "SELECT users_app.login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
+                      "ST_Y(lastPosition), push_token FROM users_app INNER JOIN auth_token ON users_app.login=auth_token.login and auth_token.token=%s"
+                cur.execute(sql,token)
+                user = cur.fetchone()
+
+                if user is None:
+                    raise Error('Authentication error', 400)
+                return { 'user': user.to_json(), 'token': token }
+
+        except Exception as e:
+            print(e)
+            self.con.rollback()
+            return e.get_error()
+
     def get(self, login=None):
         if login is None:
             login = self.login
@@ -133,12 +154,17 @@ class UserView():
                 print(e)
                 return Error('Problem happened in query get', 400).get_error()
 
-    def list(self):
+    def list(self, list=None):
         with self.con:
             try:
                 cur = self.con.cursor(Model = User)
-                sql = "Select login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
-                      "ST_Y(lastPosition), push_token from users_app"
+                if list is not None:
+                    t = tuple(list)
+                    sql = "Select login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
+                          "ST_Y(lastPosition), push_token from users_app WHERE login IN {}".format(t)
+                else:
+                    sql = "Select login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
+                          "ST_Y(lastPosition), push_token from users_app"
                 cur.execute(sql)
                 users = cur.fetchall()
                 users_dict = {}
@@ -172,6 +198,27 @@ class UserView():
         except Exception as e:
             print(e)
             return Error('Problem happened in query get', 400).get_error()
+
+    """
+    Update location
+    :param latitude
+    : param longitude
+    """
+    def update_location(self, location):
+        try:
+            latitude = location.get('latitude')
+            longitude = location.get('longitude')
+            with self.con:
+                cur = self.con.cursor(Model=User)
+                sql = "UPDATE `users_app` SET `lastPosition`= POINT(%s, %s) WHERE login = %s"
+                cur.execute(sql, (latitude, longitude, self.login))
+                self.con.commit()
+
+                return self.get().to_json()
+        except Exception as e:
+            print(e)
+            self.con.rollback()
+            return Error('Problem happened in updating location for user', 400).get_error()
 
     def push_token(self, push_token):
         try:
@@ -213,7 +260,7 @@ class UserView():
                 user_list = cur.fetchall()
                 list_tokens = []
                 for user in user_list:
-                    list_tokens.append(user.to_json().get('push_token'))
+                    list_tokens.append(user.get_push_token())
 
                 return list_tokens
 
@@ -230,7 +277,7 @@ class UserView():
                 cur.execute(sql)
                 list_users = cur.fetchall()
                 list_tokens = []
-                mapping_list = dict((user.to_json().get('login'), user.to_json().get('push_token')) for user in list_users)
+                mapping_list = dict((user.to_json().get('login'), user.get_push_token()) for user in list_users)
                 token_list = [mapping_list[login] for login in login_list]
                 for token in token_list:
                     list_tokens.append(token)
