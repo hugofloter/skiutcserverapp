@@ -245,7 +245,7 @@ class UserView():
     def autocomplete(self, query):
         try:
             with self.con:
-                decoded_query = unquote(query).decode('utf8')
+                decoded_query = unquote(query)
                 cur = self.con.cursor()
                 sql = "SELECT login, firstname, lastname FROM users_app WHERE firstname LIKE %s OR lastname LIKE %s OR login LIKE %s LIMIT 5"
                 cur.execute(sql, ('%' + decoded_query + '%', '%' + decoded_query + '%', '%' + decoded_query + '%'))
