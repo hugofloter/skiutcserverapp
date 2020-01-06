@@ -154,12 +154,17 @@ class UserView():
                 print(e)
                 return Error('Problem happened in query get', 400).get_error()
 
-    def list(self):
+    def list(self, list=None):
         with self.con:
             try:
                 cur = self.con.cursor(Model = User)
-                sql = "Select login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
-                      "ST_Y(lastPosition), push_token from users_app"
+                if list is not None:
+                    t = tuple(list)
+                    sql = "Select login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
+                          "ST_Y(lastPosition), push_token from users_app WHERE login IN {}".format(t)
+                else:
+                    sql = "Select login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
+                          "ST_Y(lastPosition), push_token from users_app"
                 cur.execute(sql)
                 users = cur.fetchall()
                 users_dict = {}
