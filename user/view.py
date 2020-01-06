@@ -9,7 +9,7 @@ from utils.errors import Error
 import json
 
 from user.model import User, Location
-from urllib import unquote
+from urllib.parse import unquote
 
 
 class UserView():
