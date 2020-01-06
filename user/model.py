@@ -19,10 +19,10 @@ class User():
             'firstname': self.firstname,
             'email': self.email,
             'isAdmin': self.is_admin,
-            'lastPosition': self.last_position,
-            'push_token': self.push_token
         }
 
+    def get_push_token(self):
+        return self.push_token
 
 class Location:
     def __init__(self, data):

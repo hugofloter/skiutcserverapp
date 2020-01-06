@@ -117,15 +117,28 @@ class GroupView():
                 cur = self.con.cursor(Model = UserGroup)
                 sql = "SELECT * from `usergroup` WHERE `id_group` = %s"
                 cur.execute(sql, id_group)
-                response = cur.fetchall()
-                count = 0
-                result = {}
-                for value in response:
-                    usergroup = value.to_json()
-                    result[count] = usergroup
-                    count += 1
+                users_group = cur.fetchall()
+                ug_dict = {}
+                login_list = []
+                for user in users_group:
+                    user = user.to_json()
+                    ug_dict[user['login_user']] = user
+                    login_list.append(user['login_user'])
 
-                return result
+                users = UserView().list(list=login_list)
+                for user_key in users:
+                    user = users[user_key]
+                    user_group = ug_dict.get(user['login'])
+
+                    user['status'] = user_group['status']
+                    user['expiration_date'] = user_group['expiration_date']
+
+                    if user_group['share_position']:
+                        user['location'] = UserView(user['login']).get_location()
+
+                    users[user_key] = user
+
+                return users
 
         except Exception as e:
             print(e)
@@ -143,7 +156,7 @@ class GroupView():
                 response = cur.fetchone()
                 if response is None:
                     return {}
-                list_users = self.merge_user_location(id_group)
+                list_users = self.list_user_from_group(id_group)
 
                 group = response.to_json()
                 group['users'] = list_users
@@ -174,7 +187,7 @@ class GroupView():
             return Error('Problem happened in query get', 400).get_error()
 
     """
-    get list group from login 
+    get list group from login
     """
     def list(self, login):
         try:
@@ -278,25 +291,6 @@ class GroupView():
             return Error('Problem happened in updating user beer call in group', 400).get_error()
 
     """
-    check if user allow location
-    :param
-    """
-    def user_allow_location(self, id_group, login):
-        try:
-            with self.con:
-                cur = self.con.cursor(Model = UserGroup)
-                sql = "SELECT * from `usergroup` WHERE login_user = %s and id_group = %s"
-                cur.execute(sql, (login, id_group))
-                response = cur.fetchone()
-                if response is None:
-                    return False
-                return bool(response.to_json().get('share_position'))
-
-        except Exception as e:
-            print(e)
-            return Error('Problem happened in query get', 400).get_error()
-
-    """
     Update location permission of user
     :param id_group
     :param login
@@ -315,41 +309,3 @@ class GroupView():
             print(e)
             self.con.rollback()
             return Error('Problem happened in updating permission location for user', 400).get_error()
-
-    """
-    Update location of user
-    :param login
-    :param location Location object 
-    """
-    def update_location(self, login, location, id_group):
-        try:
-            with self.con:
-                cur = self.con.cursor(Model = User)
-                sql = "UPDATE `users_app` SET `lastPosition` = POINT(%s, %s) WHERE login = %s"
-                cur.execute(sql, (location.to_json().get('latitude'), location.to_json().get('longitude'), login))
-                self.con.commit()
-
-                return self.get(id_group)
-
-        except Exception as e:
-            print(e)
-            self.con.rollback()
-            return Error('Problem happened in updating location for user', 400).get_error()
-
-    """
-    list of location by user if allow
-    :param id_group
-    """
-    def merge_user_location(self, id_group):
-        try:
-            list_users_in_group = self.list_user_from_group(id_group)
-            for (n, user) in list_users_in_group.items():
-                if user.get('share_position'):
-                    location = UserView(user.get('login_user')).get_location()
-                    user['location'] = location
-
-            return list_users_in_group
-
-        except Exception as e:
-            print(e)
-            return Error('Problem happened when merging location', 400).get_error()
