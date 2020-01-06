@@ -47,6 +47,8 @@ def authentication():
 @authenticate
 def get_users(user=None):
     try:
+        if request.query.get('query'):
+            return UserView().autocomplete(request.query.get('query'))
         return UserView().list()
     except Exception as e:
         print(e)
