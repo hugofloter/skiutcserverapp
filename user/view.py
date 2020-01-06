@@ -98,7 +98,9 @@ class UserView():
                     cur.execute(sql, (self.login, token))
                     self.con.commit()
 
-                    return {'user': user.to_json(), 'token': token}
+                    json_user = user.to_json()
+                    json_user['push_token'] = user.get_push_token()
+                    return {'user': json_user, 'token': token}
 
                 except Exception as e:
                     self.con.rollback()
@@ -130,7 +132,10 @@ class UserView():
 
                 if user is None:
                     raise Error('Authentication error', 400)
-                return { 'user': user.to_json(), 'token': token }
+                json_user = user.to_json()
+                json_user['push_token'] = user.get_push_token()
+                
+                return {'user': json_user, 'token': token}
 
         except Exception as e:
             print(e)
