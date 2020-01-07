@@ -36,6 +36,10 @@ class CustomCursor(Cursor):
         result = self._rows[self.rownumber]
         self.rownumber += 1
         if self.Model:
+            description = self.description
+            if description:
+                dict_result = { description[i][0]: attr for i, attr in enumerate(result) }
+                return self.Model(dict_result)
             return self.Model(result)
         return result
 
@@ -46,12 +50,22 @@ class CustomCursor(Cursor):
             return ()
         if self.rownumber:
             if self.Model:
-                result = [self.Model(value) for value in self._rows[self.rownumber:]]
+                description = self.description
+                if description:
+                    list_values = [{description[i][0]: attr for i, attr in enumerate(value)} for value in self._rows[self.rownumber:]]
+                    result = [self.Model(value) for value in list_values]
+                else:
+                    result = [self.Model(value) for value in self._rows[self.rownumber:]]
             else:
                 result = self._rows[self.rownumber:]
         else:
             if self.Model:
-                result = [self.Model(value) for value in self._rows]
+                description = self.description
+                if description:
+                    list_values = [{description[i][0]: attr for i, attr in enumerate(value)} for value in self._rows]
+                    result = [self.Model(value) for value in list_values]
+                else:
+                    result = [self.Model(value) for value in self._rows]
             else:
                 result = self._rows
 

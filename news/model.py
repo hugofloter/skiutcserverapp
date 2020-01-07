@@ -1,13 +1,13 @@
 class News():
     def __init__(self, data):
-        self.id = data[0]
-        self.title = data[1]
-        self.text = data[2]
-        self.img_url = data[3]
-        self.img_width = data[4]
-        self.img_height = data[5]
-        self.date = data[6].strftime("%m-%d-%Y %H:%M:%S")
-        self.type = data[7]
+        self.id = data.get('id')
+        self.title = data.get('title')
+        self.text = data.get('text')
+        self.img_url = data.get('img_url')
+        self.img_width = data.get('img_width')
+        self.img_height = data.get('img_height')
+        self.date = data.get('date').strftime("%m-%d-%Y %H:%M:%S")
+        self.type = data.get('type')
 
     def to_json(self):
         return {
