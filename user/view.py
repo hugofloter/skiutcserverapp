@@ -46,8 +46,8 @@ class UserView():
         try:
             with self.con:
                 cur = self.con.cursor(Model = User)
-                sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
-                      "ST_Y(lastPosition), push_token, img_url, img_width, img_height FROM users_app WHERE login=%s and password=aes_encrypt(%s, %s)"
+                sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition) AS latitude, " \
+                      "ST_Y(lastPosition) AS longitude, push_token, img_url, img_width, img_height FROM users_app WHERE login=%s and password=aes_encrypt(%s, %s)"
                 cur.execute(sql, (self.login, pwd, SALT))
                 user = cur.fetchone()
                 if user is None:
@@ -59,8 +59,8 @@ class UserView():
                 except Exception as e:
                     self.con.rollback()
                     raise e
-                sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
-                      "ST_Y(lastPosition), push_token, img_url, img_width, img_height FROM users_app WHERE login=%s"
+                sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition) AS latitude, " \
+                      "ST_Y(lastPosition) AS longitude, push_token, img_url, img_width, img_height FROM users_app WHERE login=%s"
                 cur.execute(sql, self.login)
                 user = cur.fetchone()
                 return user.to_json()
@@ -84,8 +84,8 @@ class UserView():
         try:
             with self.con:
                 cur = self.con.cursor(Model = User)
-                sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
-                      "ST_Y(lastPosition), push_token, img_url, img_width, img_height FROM users_app WHERE login=%s and password=aes_encrypt(%s, %s)"
+                sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition) AS latitude, " \
+                      "ST_Y(lastPosition) as longitude, push_token, img_url, img_width, img_height FROM users_app WHERE login=%s and password=aes_encrypt(%s, %s)"
                 cur.execute(sql, (self.login, pwd, SALT))
                 user = cur.fetchone()
                 if user is None:
@@ -125,8 +125,8 @@ class UserView():
         try:
             with self.con:
                 cur = self.con.cursor(Model=User)
-                sql = "SELECT users_app.login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
-                      "ST_Y(lastPosition), push_token, img_url, img_width, img_height FROM users_app INNER JOIN auth_token ON users_app.login=auth_token.login and auth_token.token=%s"
+                sql = "SELECT users_app.login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition) AS latitude, " \
+                      "ST_Y(lastPosition) AS longitude, push_token, img_url, img_width, img_height FROM users_app INNER JOIN auth_token ON users_app.login=auth_token.login and auth_token.token=%s"
                 cur.execute(sql,token)
                 user = cur.fetchone()
 
@@ -165,8 +165,8 @@ class UserView():
         with self.con:
             try:
                 cur = self.con.cursor(Model= User)
-                sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
-                      "ST_Y(lastPosition), push_token, img_url, img_width, img_height FROM users_app WHERE login=%s"
+                sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition) as latitude, " \
+                      "ST_Y(lastPosition) as longitude, push_token, img_url, img_width, img_height FROM users_app WHERE login=%s"
                 cur.execute(sql, login)
                 user = cur.fetchone()
 
@@ -183,11 +183,11 @@ class UserView():
                 if list is not None:
                     t = tuple(list)
                     lookup = f"IN {t}" if len(t) > 1 else f"='{t[0]}'"
-                    sql = "Select login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
-                          f"ST_Y(lastPosition), push_token, img_url, img_width, img_height from users_app WHERE login {lookup}"
+                    sql = "Select login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition) AS latitude, " \
+                          f"ST_Y(lastPosition) AS longitude, push_token, img_url, img_width, img_height from users_app WHERE login {lookup}"
                 else:
-                    sql = "Select login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
-                          "ST_Y(lastPosition), push_token, img_url, img_width, img_height from users_app"
+                    sql = "Select login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition) AS latitude, " \
+                          "ST_Y(lastPosition) AS longitude, push_token, img_url, img_width, img_height from users_app"
                 cur.execute(sql)
                 users = cur.fetchall()
                 users_dict = {}
@@ -256,8 +256,8 @@ class UserView():
                     self.con.rollback()
                     raise e
 
-                sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
-                      "ST_Y(lastPosition), push_token, img_url, img_width, img_height FROM users_app WHERE login=%s"
+                sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition) AS latitude, " \
+                      "ST_Y(lastPosition) as longitude, push_token, img_url, img_width, img_height FROM users_app WHERE login=%s"
                 cur.execute(sql, self.login)
                 user = cur.fetchone()
 
@@ -277,14 +277,14 @@ class UserView():
         with self.con:
             try:
                 cur = self.con.cursor(Model = User)
-                sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
-                      "ST_Y(lastPosition), push_token, img_url, img_width, img_height FROM users_app WHERE push_token IS NOT NULL"
+                sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition) AS latitude, " \
+                      "ST_Y(lastPosition) AS longitude, push_token, img_url, img_width, img_height FROM users_app WHERE push_token IS NOT NULL"
                 cur.execute(sql)
                 user_list = cur.fetchall()
                 list_tokens = []
                 for user in user_list:
                     list_tokens.append(user.get_push_token())
-
+                print(list_tokens)
                 return list_tokens
 
             except Exception as e:
@@ -295,8 +295,8 @@ class UserView():
         with self.con:
             try:
                 cur = self.con.cursor(Model = User)
-                sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
-                      "ST_Y(lastPosition), push_token, img_url, img_width, img_height FROM users_app WHERE push_token IS NOT NULL"
+                sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition) AS latitude, " \
+                      "ST_Y(lastPosition) AS longitude, push_token, img_url, img_width, img_height FROM users_app WHERE push_token IS NOT NULL"
                 cur.execute(sql)
                 list_users = cur.fetchall()
                 list_tokens = []
@@ -316,12 +316,17 @@ class UserView():
         try:
             with self.con:
                 decoded_query = unquote(query)
-                cur = self.con.cursor()
-                sql = "SELECT login, firstname, lastname FROM users_app WHERE firstname LIKE %s OR lastname LIKE %s OR login LIKE %s LIMIT 5"
+                cur = self.con.cursor(Model= User)
+                sql = "SELECT login, firstname, lastname, img_url, img_width, img_height FROM users_app WHERE firstname LIKE %s OR lastname LIKE %s OR login LIKE %s LIMIT 5"
                 cur.execute(sql, ('%' + decoded_query + '%', '%' + decoded_query + '%', '%' + decoded_query + '%'))
                 list_users = cur.fetchall()
-                desc = cur.description
-                result = {nb_user: {desc[index][0]: attr for index, attr in enumerate(user)} for nb_user, user in enumerate(list_users)}
+
+                print(list_users)
+                result = {}
+                count = 0
+                for user in list_users:
+                    result[count] = user.to_json()
+                    count +=1
 
                 return result
 
