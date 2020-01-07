@@ -47,7 +47,7 @@ class UserView():
             with self.con:
                 cur = self.con.cursor(Model = User)
                 sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
-                      "ST_Y(lastPosition), push_token FROM users_app WHERE login=%s and password=aes_encrypt(%s, %s)"
+                      "ST_Y(lastPosition), push_token, img_url, img_width, img_height FROM users_app WHERE login=%s and password=aes_encrypt(%s, %s)"
                 cur.execute(sql, (self.login, pwd, SALT))
                 user = cur.fetchone()
                 if user is None:
@@ -60,7 +60,7 @@ class UserView():
                     self.con.rollback()
                     raise e
                 sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
-                      "ST_Y(lastPosition), push_token FROM users_app WHERE login=%s"
+                      "ST_Y(lastPosition), push_token, img_url, img_width, img_height FROM users_app WHERE login=%s"
                 cur.execute(sql, self.login)
                 user = cur.fetchone()
                 return user.to_json()
@@ -85,7 +85,7 @@ class UserView():
             with self.con:
                 cur = self.con.cursor(Model = User)
                 sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
-                      "ST_Y(lastPosition), push_token FROM users_app WHERE login=%s and password=aes_encrypt(%s, %s)"
+                      "ST_Y(lastPosition), push_token, img_url, img_width, img_height FROM users_app WHERE login=%s and password=aes_encrypt(%s, %s)"
                 cur.execute(sql, (self.login, pwd, SALT))
                 user = cur.fetchone()
                 if user is None:
@@ -126,7 +126,7 @@ class UserView():
             with self.con:
                 cur = self.con.cursor(Model=User)
                 sql = "SELECT users_app.login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
-                      "ST_Y(lastPosition), push_token FROM users_app INNER JOIN auth_token ON users_app.login=auth_token.login and auth_token.token=%s"
+                      "ST_Y(lastPosition), push_token, img_url, img_width, img_height FROM users_app INNER JOIN auth_token ON users_app.login=auth_token.login and auth_token.token=%s"
                 cur.execute(sql,token)
                 user = cur.fetchone()
 
@@ -140,7 +140,24 @@ class UserView():
         except Exception as e:
             print(e)
             self.con.rollback()
-            return e.get_error()
+            return Error('Authentication error', 400).get_error()
+
+    def change_avatar(self, data):
+        try:
+            with self.con:
+                img_url = data.get('img_url')
+                img_width = data.get('img_width')
+                img_height = data.get('img_height')
+                cur = self.con.cursor(Model=User)
+                sql = "UPDATE users_app SET img_url=%s, img_width=%s, img_height=%s WHERE login=%s"
+                cur.execute(sql, (img_url, img_width, img_height, self.login))
+                self.con.commit()
+                return self.get(self.login)
+
+        except Exception as e:
+            print(e)
+            self.con.rollback()
+            return Error('Problem happened in changing avatar', 400).get_error()
 
     def get(self, login=None):
         if login is None:
@@ -149,7 +166,7 @@ class UserView():
             try:
                 cur = self.con.cursor(Model= User)
                 sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
-                      "ST_Y(lastPosition), push_token FROM users_app WHERE login=%s"
+                      "ST_Y(lastPosition), push_token, img_url, img_width, img_height FROM users_app WHERE login=%s"
                 cur.execute(sql, login)
                 user = cur.fetchone()
 
@@ -167,10 +184,11 @@ class UserView():
                     t = tuple(list)
                     lookup = f"IN {t}" if len(t) > 1 else f"='{t[0]}'"
                     sql = "Select login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
-                          f"ST_Y(lastPosition), push_token from users_app WHERE login {lookup}"
+
+                          f"ST_Y(lastPosition), push_token, img_url, img_width, img_height from users_app WHERE login {lookup}"
                 else:
                     sql = "Select login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
-                          "ST_Y(lastPosition), push_token from users_app"
+                          "ST_Y(lastPosition), push_token, img_url, img_width, img_height from users_app"
                 cur.execute(sql)
                 users = cur.fetchall()
                 users_dict = {}
@@ -240,7 +258,7 @@ class UserView():
                     raise e
 
                 sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
-                      "ST_Y(lastPosition), push_token FROM users_app WHERE login=%s"
+                      "ST_Y(lastPosition), push_token, img_url, img_width, img_height FROM users_app WHERE login=%s"
                 cur.execute(sql, self.login)
                 user = cur.fetchone()
 
@@ -261,7 +279,7 @@ class UserView():
             try:
                 cur = self.con.cursor(Model = User)
                 sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
-                      "ST_Y(lastPosition), push_token FROM users_app WHERE push_token IS NOT NULL"
+                      "ST_Y(lastPosition), push_token, img_url, img_width, img_height FROM users_app WHERE push_token IS NOT NULL"
                 cur.execute(sql)
                 user_list = cur.fetchall()
                 list_tokens = []
@@ -279,7 +297,7 @@ class UserView():
             try:
                 cur = self.con.cursor(Model = User)
                 sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
-                      "ST_Y(lastPosition), push_token FROM users_app WHERE push_token IS NOT NULL"
+                      "ST_Y(lastPosition), push_token, img_url, img_width, img_height FROM users_app WHERE push_token IS NOT NULL"
                 cur.execute(sql)
                 list_users = cur.fetchall()
                 list_tokens = []
