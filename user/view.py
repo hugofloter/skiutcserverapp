@@ -187,7 +187,7 @@ class UserView():
                 print(e)
                 return Error('Problem happened in query get', 400).get_error()
 
-    def list(self, list=None):
+    def list(self, list=None, mail=None):
         with self.con:
             try:
                 cur = self.con.cursor(Model = User)
@@ -283,6 +283,24 @@ class UserView():
 
         finally:
             self.con.close()
+
+    def list_mail(self):
+        with self.con:
+            try:
+                cur = self.con.cursor(Model = User)
+                sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
+                      "ST_Y(lastPosition), push_token, img_url, img_width, img_height FROM users_app WHERE push_token IS NOT NULL"
+                cur.execute(sql)
+                user_list = cur.fetchall()
+                list_mail = []
+                for user in user_list:
+                    list_mail.append(user.to_json().get('email'))
+
+                return list_mail
+
+            except Exception as e:
+                response.status = 400
+                return Error('Problem happened in query list', 501).get_error()
 
     def list_tokens(self):
         with self.con:

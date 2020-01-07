@@ -81,7 +81,8 @@ class NewsView():
                 message = NotificationMessage(data)
                 NotificationsView(message, tokens).send_push_message()
                 if type == 'email':
-                    Mail().massive_mail_sender()
+                    list_mail = UserView().list_mail()
+                    Mail().massive_mail_sender(list_mail, title, text)
 
                 return last.to_json()
 
