@@ -184,7 +184,6 @@ class UserView():
                     t = tuple(list)
                     lookup = f"IN {t}" if len(t) > 1 else f"='{t[0]}'"
                     sql = "Select login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
-
                           f"ST_Y(lastPosition), push_token, img_url, img_width, img_height from users_app WHERE login {lookup}"
                 else:
                     sql = "Select login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
