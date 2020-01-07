@@ -10,7 +10,12 @@ class User():
             'latitude': data[6],
             'longitude': data[7]
         }
-        self.push_token = data[8]
+        self.push_token = data[8],
+        self.avatar = {
+            'img_width': data[9],
+            'img_weight': data[10],
+            'img_url': data[11]
+        }
 
     def to_json(self):
         return {
@@ -19,10 +24,12 @@ class User():
             'firstname': self.firstname,
             'email': self.email,
             'isAdmin': self.is_admin,
+            'avatar': self.avatar
         }
 
     def get_push_token(self):
         return self.push_token
+
 
 class Location:
     def __init__(self, data):
