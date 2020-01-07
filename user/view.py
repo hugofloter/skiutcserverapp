@@ -98,7 +98,9 @@ class UserView():
                     cur.execute(sql, (self.login, token))
                     self.con.commit()
 
-                    return {'user': user.to_json(), 'token': token}
+                    json_user = user.to_json()
+                    json_user['push_token'] = user.get_push_token()
+                    return {'user': json_user, 'token': token}
 
                 except Exception as e:
                     self.con.rollback()
@@ -130,7 +132,10 @@ class UserView():
 
                 if user is None:
                     raise Error('Authentication error', 400)
-                return { 'user': user.to_json(), 'token': token }
+                json_user = user.to_json()
+                json_user['push_token'] = user.get_push_token()
+
+                return {'user': json_user, 'token': token}
 
         except Exception as e:
             print(e)
@@ -177,8 +182,10 @@ class UserView():
                 cur = self.con.cursor(Model = User)
                 if list is not None:
                     t = tuple(list)
+                    lookup = f"IN {t}" if len(t) > 1 else f"='{t[0]}'"
                     sql = "Select login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
-                          "ST_Y(lastPosition), push_token, img_url, img_width, img_height from users_app WHERE login IN {}".format(t)
+
+                          f"ST_Y(lastPosition), push_token, img_url, img_width, img_height from users_app WHERE login {lookup}"
                 else:
                     sql = "Select login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
                           "ST_Y(lastPosition), push_token, img_url, img_width, img_height from users_app"
