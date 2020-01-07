@@ -12,9 +12,9 @@ class User():
         }
         self.push_token = data[8],
         self.avatar = {
-            'img_width': data[9],
-            'img_weight': data[10],
-            'img_url': data[11]
+            'img_url': data[9],
+            'img_width': data[10],
+            'img_weight': data[11],
         }
 
     def to_json(self):

@@ -152,7 +152,7 @@ class UserView():
                 sql = "UPDATE users_app SET img_url=%s, img_width=%s, img_height=%s WHERE login=%s"
                 cur.execute(sql, (img_url, img_width, img_height, self.login))
                 self.con.commit()
-                return self.get(self.login)
+                return self.get(self.login).to_json()
 
         except Exception as e:
             print(e)
