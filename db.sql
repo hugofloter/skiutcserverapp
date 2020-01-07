@@ -23,7 +23,10 @@ CREATE TABLE IF NOT EXISTS`users_app` (
   `isAdmin` Boolean DEFAULT FALSE,
   `lastPosition` POINT DEFAULT NULL, #Changement of type
   `password` varbinary(50) DEFAULT NULL,
-  `push_token` varchar(250) DEFAULT NULL #new column
+  `push_token` varchar(250) DEFAULT NULL,
+  `img_url` varchar(100) DEFAULT NULL,
+  `img_width` int(10) DEFAULT NULL,
+  `img_height` int(10) DEFAULT NULL #Adding 3 new columns for avatar
 );
 
 --
