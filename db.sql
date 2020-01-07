@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS`users_app` (
   `push_token` varchar(250) DEFAULT NULL,
   `img_url` varchar(100) DEFAULT NULL,
   `img_width` int(10) DEFAULT NULL,
-  `img_height` int(10) DEFAULT NULL,
+  `img_height` int(10) DEFAULT NULL #Adding 3 new columns for avatar
 );
 
 --
