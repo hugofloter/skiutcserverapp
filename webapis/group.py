@@ -49,15 +49,15 @@ def get_group_infos(id, user=None):
 @delete('/groups/<id>')
 @authenticate
 def delete_group(id, user=None):
-    """deletes a group if owner"""
     try:
         data = json.loads(request.body.read())
         login = user.to_json().get('login')
+        # refuse invitation
         if data.get('invitation'):
             invitation_type = data.get('invitation')
             return GroupView().handle_invitation(id, login, invitation_type)
-        if data.get('delete'):
-            return GroupView().delete(id, login)
+        """deletes a group if owner, leave group if member"""
+        return GroupView().delete(id, login)
 
     except Exception as e:
         return e

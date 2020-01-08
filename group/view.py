@@ -46,11 +46,20 @@ class GroupView():
         try:
             with self.con:
                 cur = self.con.cursor(Model = Group)
-                sql = "DELETE FROM `groups` WHERE id = %s AND owner=%s"
-                cur.execute(sql, (id_group,  login))
-                if cur.rowcount == 0:
-                    return Error('User unauthorized to delete this group', 403).get_error()
-                self.con.commit()
+                sql = "SELECT * FROM `groups` WHERE id=%s"
+                cur.execute(sql, id_group)
+
+                group = cur.fetchone()
+                if group is None:
+                    return Error('Not Found', 404).get_error()
+                if group.to_json()['owner'] == login:
+                    sql = "DELETE FROM `groups` WHERE id = %s AND owner=%s"
+                    cur.execute(sql, (id_group,  login))
+                    if cur.rowcount == 0:
+                        return Error('User unauthorized to delete this group', 403).get_error()
+                    self.con.commit()
+                else:
+                    return self.remove_from_group(id_group, login)
 
                 return self.list(login)
 
