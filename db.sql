@@ -96,3 +96,16 @@ CREATE TABLE IF NOT EXISTS `usergroup` (
     ON DELETE CASCADE,
   PRIMARY KEY(login_user, id_group)
 );
+
+--
+-- Table structure for table `piste_anim`
+--
+
+CREATE TABLE IF NOT EXISTS `piste_anim` (
+  `login_user` varchar(40) NOT NULL,
+  `level` int(10) NOT NULL DEFAULT 0,
+  INDEX group_index (login_user),
+  FOREIGN KEY (login_user)
+    REFERENCES `users_app`(login)
+    ON DELETE CASCADE
+);
