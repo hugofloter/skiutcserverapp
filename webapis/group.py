@@ -62,22 +62,6 @@ def delete_group(id, user=None):
     except Exception as e:
         return e
 
-
-@post('/groups/<id>')
-@authenticate
-def send_invitation(id, user=None):
-    """send invitation to user/s for a group"""
-    try:
-        data = json.loads(request.body.read())
-        if not data.get('list_login'):
-            return Error('No login provided - invitation is cancelled', 400)
-        login_list = data.get('list_login')
-        return GroupView().add_to_group(id, login_list=login_list)
-
-    except Exception as e:
-        return e
-
-
 @put('/groups/<id>')
 @authenticate
 def update_group(id, user=None):
@@ -93,5 +77,10 @@ def update_group(id, user=None):
         if data.get('location_permission'):
             permission = bool(data.get('location_permission'))
             return GroupView().update_permission_location(id, login, permission)
+        if data.get('list_login'):
+            #send invitations
+            login_list = data.get('list_login')
+            GroupView().add_to_group(id, login_list=login_list)
+            return GroupView().get(id)
     except Exception as e:
         return e

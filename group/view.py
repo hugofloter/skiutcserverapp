@@ -111,11 +111,12 @@ class GroupView():
 
         return result
 
-    def list_user_from_group(self, id_group):
+    def list_user_from_group(self, id_group, accept_only=False):
         try:
             with self.con:
                 cur = self.con.cursor(Model = UserGroup)
-                sql = "SELECT * from `usergroup` WHERE `id_group` = %s"
+                accept_sql = f"AND `status`= 'V'" if accept_only else ""
+                sql = f"SELECT * from `usergroup` WHERE `id_group` = %s {accept_sql}"
                 cur.execute(sql, id_group)
                 users_group = cur.fetchall()
                 ug_dict = {}
