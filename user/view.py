@@ -6,8 +6,7 @@ from db import dbskiutc_con as db
 from bottle import response
 from config import SALT
 from utils.errors import Error
-import json
-
+from utils.mail import Mail
 from user.model import User, Location
 from urllib.parse import unquote
 
@@ -30,7 +29,19 @@ class UserView():
                 sql = "UPDATE users_app SET password=aes_encrypt(%s, %s) WHERE login=%s;"
                 cur.execute(sql, (new_pwd, SALT, self.login))
                 self.con.commit()
-                #@TODO Here we have to send the the new password to the email.
+                email = self.get(self.login).to_json().get('email')
+                msg = """
+                Salut, participant.e à l'édition 2020 de SKI'UTC. Comme tu as pu le constater, cette année, <br>
+                De la nouveauté cette année : une application SKI'UTC rien que pour toi, rien que pour vous ! <br>
+                <br>
+                Cours l'installer sur le store de ton téléphone (recherches SKI'UTC) <br>
+                <br>                
+                Pour te connecter c'est simple : tu utilises ton login (ou email si tu es tremplin), et tu utilises ces codes : 
+                <br><br>
+                <B>IDENTIFIANT : {}</B><br>
+                <B>PASSWORD : {}</B><br>
+                """.format(self.login, new_pwd)
+                Mail().mail_sender(email, "Ton mot de passe pour l'application SKI'UTC", msg)
                 return new_pwd
 
         except Exception as e:
@@ -176,7 +187,7 @@ class UserView():
                 print(e)
                 return Error('Problem happened in query get', 400).get_error()
 
-    def list(self, list=None):
+    def list(self, list=None, mail=None):
         with self.con:
             try:
                 cur = self.con.cursor(Model = User)
@@ -272,6 +283,23 @@ class UserView():
 
         finally:
             self.con.close()
+
+    def list_mail(self):
+        with self.con:
+            try:
+                cur = self.con.cursor(Model = User)
+                sql = "SELECT email FROM users_app"
+                cur.execute(sql)
+                user_list = cur.fetchall()
+                list_mail = []
+                for user in user_list:
+                    list_mail.append(user.to_json().get('email'))
+
+                return list_mail
+
+            except Exception as e:
+                response.status = 400
+                return Error('Problem happened in query list', 501).get_error()
 
     def list_tokens(self):
         with self.con:

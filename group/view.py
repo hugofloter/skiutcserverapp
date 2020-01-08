@@ -4,6 +4,8 @@ from user.view import UserView
 from db import dbskiutc_con as db
 from utils.errors import Error
 from datetime import datetime
+from notifications.view import NotificationsView
+from notifications.model import NotificationMessage
 import pymysql
 
 
@@ -27,7 +29,7 @@ class GroupView():
                 cur.execute(sql)
                 last = cur.fetchone()
                 self.add_to_group(last.to_json().get('id'), owner=owner)
-                self.add_to_group(last.to_json().get('id'), login_list=list_login)
+                self.add_to_group(last.to_json().get('id'), login_list=list_login, group=last)
                 self.con.commit()
                 return last.to_json()
 
@@ -62,7 +64,7 @@ class GroupView():
     :param loginList list of login to add
     :return array list of user added to group on usergroup format
     """
-    def add_to_group(self, id_group, login_list=None, owner=None):
+    def add_to_group(self, id_group, login_list=None, owner=None, group=None):
         result = {}
         count = 0
         try:
@@ -87,7 +89,6 @@ class GroupView():
                             last = cur.fetchone()
                             result[count] = last.to_json()
                             count += 1
-                            # @TODO use Notification here
 
                         except Exception as e:
                             print(e)
@@ -98,6 +99,11 @@ class GroupView():
                             else:
                                 self.con.rollback()
                                 raise e
+
+                    tokens = UserView().list_tokens_from_logins(login_list)
+                    message = NotificationMessage({'title': 'Invitation de groupe - {}'.format(group.to_json().get('name')),
+                                                   'text': '{} t\'a invité à rejoindre son nouveau groupe !'.format(group.to_json().get('owner'))})
+                    NotificationsView(message, tokens).send_push_message()
 
         except Exception as e:
             print(e)
@@ -267,7 +273,15 @@ class GroupView():
                 sql = "UPDATE `groups` SET `beer_call` = %s WHERE id = %s"
                 cur.execute(sql, (new_beer_call, id_group))
                 self.con.commit()
-                #@TODO use Notification here
+                group_name = self.get_global(id_group).get('name')
+                list_users = self.list_user_from_group(id_group)
+                login_list = []
+                for nb, user in list_users.items():
+                    login_list.append(user.get('login'))
+                tokens = UserView().list_tokens_from_logins(login_list)
+                message = NotificationMessage({'title': 'La soif se fait attendre !',
+                                               'text': '{}, Ce groupe veut absolument boire un coup maintenant!'.format(group_name)})
+                NotificationsView(message, tokens).send_push_message()
 
                 return self.get(id_group)
 
