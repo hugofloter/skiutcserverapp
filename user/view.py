@@ -288,8 +288,7 @@ class UserView():
         with self.con:
             try:
                 cur = self.con.cursor(Model = User)
-                sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition), " \
-                      "ST_Y(lastPosition), push_token, img_url, img_width, img_height FROM users_app WHERE push_token IS NOT NULL"
+                sql = "SELECT email FROM users_app"
                 cur.execute(sql)
                 user_list = cur.fetchall()
                 list_mail = []
