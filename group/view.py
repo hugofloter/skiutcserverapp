@@ -14,7 +14,7 @@ class GroupView():
         self.con = db()
         self.login = login
 
-    def getMember(self, group_id):
+    def get_member(self, group_id):
         try:
             with self.con:
                 cur = self.con.cursor(Model = UserGroup)
@@ -186,7 +186,7 @@ class GroupView():
                 group = response.to_json()
                 group['users'] = list_users
 
-                usergroup = self.getMember(id_group).to_json()
+                usergroup = self.get_member(id_group).to_json()
                 group['share_position'] = usergroup.get('share_position')
 
                 return group
@@ -251,7 +251,7 @@ class GroupView():
 
                 if owner:
                     if owner == login:
-                        return Error('Can not delete from your own group', 400)
+                        return Error('Can not delete from your own group', 400).get_error()
                     sql = "SELECT * FROM `groups` WHERE id=%s AND owner=%s"
                     cur.execute(sql, (id_group, owner))
 
@@ -342,9 +342,8 @@ class GroupView():
                 cur.execute(sql, (perm, login, id_group))
                 self.con.commit()
 
-                group = self.get(id_group)
-                print(group)
-                return group
+                return self.get(id_group)
+
 
         except Exception as e:
             print(e)
