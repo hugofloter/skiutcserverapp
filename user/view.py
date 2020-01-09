@@ -225,6 +225,8 @@ class UserView():
                 sql = "SELECT ST_X(lastPosition), ST_Y(lastPosition) FROM `users_app` WHERE login = %s"
                 cur.execute(sql, self.login)
                 (x, y) = cur.fetchone()
+                if not x or not y:
+                    return None
                 location = Location({'latitude': x, 'longitude': y})
 
                 return location.to_json()
