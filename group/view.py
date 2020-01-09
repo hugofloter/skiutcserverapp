@@ -4,13 +4,30 @@ from user.view import UserView
 from db import dbskiutc_con as db
 from utils.errors import Error
 from datetime import datetime
+from notifications.view import NotificationsView
+from notifications.model import NotificationMessage
 import pymysql
 
 
 class GroupView():
-    def __init__(self):
+    def __init__(self, login=None):
         self.con = db()
+        self.login = login
 
+    def get_member(self, group_id):
+        try:
+            with self.con:
+                cur = self.con.cursor(Model = UserGroup)
+                sql = "SELECT * FROM usergroup WHERE id_group=%s AND login_user=%s"
+                cur.execute(sql, (group_id, self.login))
+                result=  cur.fetchone()
+
+                if result is None:
+                    raise Error('Unauthorized', 403)
+                return result
+
+        except Exception as e:
+            raise e
     """
     Create a group given datas model
     :param name > string name of group
@@ -27,7 +44,7 @@ class GroupView():
                 cur.execute(sql)
                 last = cur.fetchone()
                 self.add_to_group(last.to_json().get('id'), owner=owner)
-                self.add_to_group(last.to_json().get('id'), login_list=list_login)
+                self.add_to_group(last.to_json().get('id'), login_list=list_login, group=last)
                 self.con.commit()
                 return last.to_json()
 
@@ -44,11 +61,20 @@ class GroupView():
         try:
             with self.con:
                 cur = self.con.cursor(Model = Group)
-                sql = "DELETE FROM `groups` WHERE id = %s AND owner=%s"
-                cur.execute(sql, (id_group,  login))
-                if cur.rowcount == 0:
-                    return Error('User unauthorized to delete this group', 403).get_error()
-                self.con.commit()
+                sql = "SELECT * FROM `groups` WHERE id=%s"
+                cur.execute(sql, id_group)
+
+                group = cur.fetchone()
+                if group is None:
+                    return Error('Not Found', 404).get_error()
+                if group.to_json()['owner'] == login:
+                    sql = "DELETE FROM `groups` WHERE id = %s AND owner=%s"
+                    cur.execute(sql, (id_group,  login))
+                    if cur.rowcount == 0:
+                        return Error('User unauthorized to delete this group', 403).get_error()
+                    self.con.commit()
+                else:
+                    return self.remove_from_group(id_group, login)
 
                 return self.list(login)
 
@@ -62,7 +88,7 @@ class GroupView():
     :param loginList list of login to add
     :return array list of user added to group on usergroup format
     """
-    def add_to_group(self, id_group, login_list=None, owner=None):
+    def add_to_group(self, id_group, login_list=None, owner=None, group=None):
         result = {}
         count = 0
         try:
@@ -87,7 +113,6 @@ class GroupView():
                             last = cur.fetchone()
                             result[count] = last.to_json()
                             count += 1
-                            # @TODO use Notification here
 
                         except Exception as e:
                             print(e)
@@ -99,17 +124,23 @@ class GroupView():
                                 self.con.rollback()
                                 raise e
 
+                    tokens = UserView().list_tokens_from_logins(login_list)
+                    message = NotificationMessage({'title': 'Invitation de groupe - {}'.format(group.to_json().get('name')),
+                                                   'text': '{} t\'a invité à rejoindre son nouveau groupe !'.format(group.to_json().get('owner'))})
+                    NotificationsView(message, tokens).send_push_message()
+
         except Exception as e:
             print(e)
             return Error('Problem happened when adding to group', 400).get_error()
 
         return result
 
-    def list_user_from_group(self, id_group):
+    def list_user_from_group(self, id_group, accept_only=False):
         try:
             with self.con:
                 cur = self.con.cursor(Model = UserGroup)
-                sql = "SELECT * from `usergroup` WHERE `id_group` = %s"
+                accept_sql = f"AND `status`= 'V'" if accept_only else ""
+                sql = f"SELECT * from `usergroup` WHERE `id_group` = %s {accept_sql}"
                 cur.execute(sql, id_group)
                 users_group = cur.fetchall()
                 ug_dict = {}
@@ -154,6 +185,9 @@ class GroupView():
 
                 group = response.to_json()
                 group['users'] = list_users
+
+                usergroup = self.get_member(id_group).to_json()
+                group['share_position'] = usergroup.get('share_position')
 
                 return group
 
@@ -210,10 +244,21 @@ class GroupView():
     """
     remove a user from a group - used when user decide to avoid invitation to group
     """
-    def remove_from_group(self, id_group, login):
+    def remove_from_group(self, id_group, login, owner=None):
         try:
             with self.con:
                 cur = self.con.cursor(Model = UserGroup)
+
+                if owner:
+                    if owner == login:
+                        return Error('Can not delete from your own group', 400).get_error()
+                    sql = "SELECT * FROM `groups` WHERE id=%s AND owner=%s"
+                    cur.execute(sql, (id_group, owner))
+
+                    group = cur.fetchone()
+                    if group is None:
+                        return Error('Not Found', 404).get_error()
+
                 sql = "DELETE FROM `usergroup` WHERE `id_group` = %s AND `login_user` = %s"
                 cur.execute(sql, (id_group, login))
                 self.con.commit()
@@ -239,7 +284,7 @@ class GroupView():
                     group = self.get_global(id_group)
                     group['user_status'] = 'V'
 
-                    return group
+                    return self.list(login)
             else:
                 with self.con:
                     cur = self.con.cursor(Model=UserGroup)
@@ -267,7 +312,15 @@ class GroupView():
                 sql = "UPDATE `groups` SET `beer_call` = %s WHERE id = %s"
                 cur.execute(sql, (new_beer_call, id_group))
                 self.con.commit()
-                #@TODO use Notification here
+                group_name = self.get_global(id_group).get('name')
+                list_users = self.list_user_from_group(id_group)
+                login_list = []
+                for nb, user in list_users.items():
+                    login_list.append(user.get('login'))
+                tokens = UserView().list_tokens_from_logins(login_list)
+                message = NotificationMessage({'title': 'La soif se fait attendre !',
+                                               'text': '{}, Ce groupe veut absolument boire un coup maintenant!'.format(group_name)})
+                NotificationsView(message, tokens).send_push_message()
 
                 return self.get(id_group)
 
@@ -284,12 +337,13 @@ class GroupView():
     def update_permission_location(self, id_group, login, perm):
         try:
             with self.con:
-                cur = self.con.cursor(Model = User)
+                cur = self.con.cursor(Model = UserGroup)
                 sql = "UPDATE `usergroup` SET `share_position` = %s WHERE `login_user` = %s AND `id_group` = %s"
                 cur.execute(sql, (perm, login, id_group))
                 self.con.commit()
 
                 return self.get(id_group)
+
 
         except Exception as e:
             print(e)
