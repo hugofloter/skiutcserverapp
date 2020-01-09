@@ -109,3 +109,14 @@ CREATE TABLE IF NOT EXISTS `piste_anim` (
     REFERENCES `users_app`(login)
     ON DELETE CASCADE
 );
+
+--
+-- Table structure for table `anim_key`
+--
+
+CREATE TABLE IF NOT EXISTS `anim_key` (
+  `key` varchar(40) NOT NULL,
+  `level` int(10) NOT NULL,
+  `next_indice` text
+);
+
