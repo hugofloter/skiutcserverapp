@@ -14,7 +14,7 @@ def get_user_level(user=None):
         if is_admin:
             return AnimationView(login=login, admin=is_admin).get_top_users()
         else:
-            return AnimationView(login=login).get_top_users()
+            return AnimationView(login=login). get_user_level()
 
     except Exception as e:
         return e
