@@ -44,7 +44,7 @@ class GroupView():
                 cur.execute(sql)
                 last = cur.fetchone()
                 self.add_to_group(last.to_json().get('id'), owner=owner)
-                self.add_to_group(last.to_json().get('id'), login_list=list_login, group=last)
+                self.add_to_group(last.to_json().get('id'), login_list=list_login, group=last.to_json())
                 self.con.commit()
                 return last.to_json()
 
@@ -93,6 +93,10 @@ class GroupView():
         count = 0
         try:
             with self.con:
+
+                if group is None:
+                    group = self.get_global(id_group)
+
                 if owner:
                     cur = self.con.cursor(Model=UserGroup)
                     sql = "INSERT INTO `usergroup` (`login_user`, `id_group`, `status`) VALUES (%s, %s, %s)"
@@ -125,8 +129,10 @@ class GroupView():
                                 raise e
 
                     tokens = UserView().list_tokens_from_logins(login_list)
-                    message = NotificationMessage({'title': 'Invitation de groupe - {}'.format(group.to_json().get('name')),
-                                                   'text': '{} t\'a invité à rejoindre son nouveau groupe !'.format(group.to_json().get('owner'))})
+                    message = NotificationMessage({
+                        'title': 'Invitation de groupe - {}'.format(group.get('name')),
+                        'text': '{} t\'a invité à rejoindre son nouveau groupe !'.format(group.get('owner'))
+                        })
                     NotificationsView(message, tokens).send_push_message()
 
         except Exception as e:

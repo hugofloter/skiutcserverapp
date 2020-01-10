@@ -35,8 +35,8 @@ class UserView():
                 De la nouveauté cette année : une application SKI'UTC rien que pour toi, rien que pour vous ! <br>
                 <br>
                 Cours l'installer sur le store de ton téléphone (recherches SKI'UTC) <br>
-                <br>                
-                Pour te connecter c'est simple : tu utilises ton login (ou email si tu es tremplin), et tu utilises ces codes : 
+                <br>
+                Pour te connecter c'est simple : tu utilises ton login (ou email si tu es tremplin), et tu utilises ces codes :
                 <br><br>
                 <B>IDENTIFIANT : {}</B><br>
                 <B>PASSWORD : {}</B><br>
@@ -307,14 +307,12 @@ class UserView():
         with self.con:
             try:
                 cur = self.con.cursor(Model = User)
-                sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition) AS latitude, " \
-                      "ST_Y(lastPosition) AS longitude, push_token, img_url, img_width, img_height FROM users_app WHERE push_token IS NOT NULL"
+                sql = "SELECT login, push_token FROM users_app WHERE push_token IS NOT NULL"
                 cur.execute(sql)
                 user_list = cur.fetchall()
                 list_tokens = []
                 for user in user_list:
                     list_tokens.append(user.get_push_token())
-                print(list_tokens)
                 return list_tokens
 
             except Exception as e:
@@ -325,15 +323,15 @@ class UserView():
         with self.con:
             try:
                 cur = self.con.cursor(Model = User)
-                sql = "SELECT login, lastname, firstname, email, password, isAdmin, ST_X(lastPosition) AS latitude, " \
-                      "ST_Y(lastPosition) AS longitude, push_token, img_url, img_width, img_height FROM users_app WHERE push_token IS NOT NULL"
+                t = tuple(login_list)
+                lookup = f"IN {t}" if len(t) > 1 else f"='{t[0]}'"
+                sql = f"SELECT login, push_token FROM users_app WHERE push_token IS NOT NULL AND login {lookup}"
                 cur.execute(sql)
                 list_users = cur.fetchall()
+
                 list_tokens = []
-                mapping_list = dict((user.to_json().get('login'), user.get_push_token()) for user in list_users)
-                token_list = [mapping_list[login] for login in login_list]
-                for token in token_list:
-                    list_tokens.append(token)
+                for user in list_users:
+                    list_tokens.append(user.get_push_token())
 
                 return list_tokens
 
@@ -346,9 +344,19 @@ class UserView():
         try:
             with self.con:
                 decoded_query = unquote(query)
+                decoded_query = decoded_query.split(' ')
+                words = []
+                for word in decoded_query:
+                    if len(word):
+                        words.append(word)
+                        
+                if not len(words):
+                    return {}
+                words = '|'.join(words)
+
                 cur = self.con.cursor(Model= User)
-                sql = "SELECT login, firstname, lastname, img_url, img_width, img_height FROM users_app WHERE firstname LIKE %s OR lastname LIKE %s OR login LIKE %s LIMIT 5"
-                cur.execute(sql, ('%' + decoded_query + '%', '%' + decoded_query + '%', '%' + decoded_query + '%'))
+                sql = "SELECT login, firstname, lastname, img_url, img_width, img_height FROM users_app WHERE login REGEXP %s  OR firstname REGEXP %s OR lastname REGEXP%s LIMIT 5"
+                cur.execute(sql, (words, words,words))
                 list_users = cur.fetchall()
 
                 print(list_users)
