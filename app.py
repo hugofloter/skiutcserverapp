@@ -1,7 +1,7 @@
 from bottle import run, get, hook, response, route, get, static_file, request
 from config import API_PORT, IMAGES_SOURCE
 from utils.middlewares import authenticate
-from webapis import user, news, potin, group
+from webapis import user, news, potin, group, animation
 
 
 @hook('after_request')
