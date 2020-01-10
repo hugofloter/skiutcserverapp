@@ -349,15 +349,13 @@ class UserView():
                 for word in decoded_query:
                     if len(word):
                         words.append(word)
-                print(words)
-
+                        
                 if not len(words):
                     return {}
                 words = '|'.join(words)
-                
+
                 cur = self.con.cursor(Model= User)
-                sql = "SELECT login, firstname, lastname, img_url, img_width, img_height FROM users_app WHERE login REGEXP %s  OR firstname REGEXP %s OR lastname REGEXP%s"
-                #sql = "SELECT login, firstname, lastname, img_url, img_width, img_height FROM users_app WHERE firstname LIKE %s OR lastname LIKE %s OR login LIKE %s LIMIT 5"
+                sql = "SELECT login, firstname, lastname, img_url, img_width, img_height FROM users_app WHERE login REGEXP %s  OR firstname REGEXP %s OR lastname REGEXP%s LIMIT 5"
                 cur.execute(sql, (words, words,words))
                 list_users = cur.fetchall()
 
