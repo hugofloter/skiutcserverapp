@@ -26,7 +26,7 @@ def update_animation(key, user=None):
     """get all news"""
     try:
         login = user.to_json().get('login')
-        return AnimationView(login=login).unlock_level(key)
+        return AnimationView(login=login).unlock_level(key, user)
 
     except Exception as e:
         return e

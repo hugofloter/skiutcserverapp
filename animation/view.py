@@ -82,7 +82,7 @@ class AnimationView():
     """
     Unlock new level
     """
-    def unlock_level(self, key):
+    def unlock_level(self, key, user):
         try:
             users_info = self.get_user_level()
             with self.con:
@@ -94,7 +94,7 @@ class AnimationView():
                     return {}
                 target_anim = response.to_json()
                 if users_info.get('level') + 1 == target_anim.get('level'):
-                    user_mail = UserView().get(self.login).to_json().get('email')
+                    user_mail = user.to_json().get('email')
                     Mail().mail_sender(user_mail, "Ton nouvel indice", target_anim.get('next_indice'))
                     return self.update_user_level(target_anim.get('level'))
                 else:
