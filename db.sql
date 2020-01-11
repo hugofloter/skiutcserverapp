@@ -120,3 +120,11 @@ CREATE TABLE IF NOT EXISTS `anim_key` (
   `next_indice` text
 );
 
+
+--
+-- Table structure for table `bot_token_challenge`
+--
+CREATE TABLE IF NOT EXISTS `bot_token_challenge` (
+  `token` varchar(30) NOT NULL,
+  `challenge` int(30) DEFAULT NULL,
+);
