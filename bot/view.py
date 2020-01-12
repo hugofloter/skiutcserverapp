@@ -24,9 +24,9 @@ class BotView():
     def validate_util_charge(self, payload, signature):
         try:
             hash = hmac.new(APP_SECRET.encode('utf-8'), payload, hashlib.sha1).hexdigest()
-
-	    if hash != signature.split('=')[1]:
+            if hash != signature.split('=')[-1]:
                 raise Error('Not the same hash', 400)
+            return None
         except Exception as e:
             print(e)
             return e
