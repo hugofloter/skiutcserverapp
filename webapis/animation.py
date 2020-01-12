@@ -10,7 +10,7 @@ def get_user_level(user=None):
     """get user level"""
     try:
         login = user.to_json().get('login')
-        return AnimationView(login=login).get_user_level()
+        return {0: AnimationView(login=login).get_user_level()}
 
     except Exception as e:
         return e
