@@ -1,5 +1,6 @@
 import string
 import random
+import hashlib
 
 from config import WEBHOOK_TOKEN
 from db import dbskiutc_con as db
@@ -18,3 +19,11 @@ class BotView():
         except Exception as e:
             print(e)
             return e.get_error()
+
+    def validate_util_charge(self, charge, signature):
+        try:
+            hash = hashlib.sha1(charge+ WEBHOOK_TOKEN)
+            
+        except Exception as e:
+            print(e)
+            return e
