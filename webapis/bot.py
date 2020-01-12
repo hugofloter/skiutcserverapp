@@ -9,16 +9,13 @@ from utils.middlewares import admin
 @post('/webhook')
 def messenger_post_message():
     try:
-        charge = request.body.read()
+        payload = request.body.read()
         signature = request.headers.get('X-Hub-Signature')
 
-        print(signature)
-        print(charge)
+        if not payload or not signature:
+             return Error('Bad request', 400).get_error()
 
-        # if not charge or not signature:
-        #     return Error('Bad request', 400).get_error()
-
-        BotView().validate_util_charge(charge, signature)
+        return BotView().validate_util_charge(payload, signature)
     except Exception as e:
         print(e)
         return Error('An error occured', 400).get_error()

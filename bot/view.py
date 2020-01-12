@@ -1,8 +1,9 @@
 import string
 import random
 import hashlib
+import hmac
 
-from config import WEBHOOK_TOKEN
+from config import WEBHOOK_TOKEN, APP_SECRET
 from db import dbskiutc_con as db
 from utils.errors import Error
 
@@ -20,10 +21,12 @@ class BotView():
             print(e)
             return e.get_error()
 
-    def validate_util_charge(self, charge, signature):
+    def validate_util_charge(self, payload, signature):
         try:
-            hash = hashlib.sha1(charge+ WEBHOOK_TOKEN)
-            
+            hash = hmac.new(APP_SECRET.encode('utf-8'), payload, hashlib.sha1).hexdigest()
+
+	    if hash != signature.split('=')[1]:
+                raise Error('Not the same hash', 400)
         except Exception as e:
             print(e)
             return e
