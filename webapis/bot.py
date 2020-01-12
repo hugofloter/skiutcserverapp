@@ -26,15 +26,4 @@ def verification():
             return Error('No data', 400)
         return BotView().verify_token(verify_token, challenge)
     except Exception as e:
-        print(e)
-        return Error('An error occured', 400).get_error()
-
-
-@get('/webhook/generate')
-@admin
-def verification(user = None):
-    try:
-        return BotView().create_challenge_token()
-    except Exception as e:
-        print(e)
-        return Error('An error occured', 400).get_error()
+        return e
