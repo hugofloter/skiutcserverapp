@@ -2,6 +2,7 @@ import string
 import random
 import hashlib
 import hmac
+import json
 
 from config import WEBHOOK_TOKEN, APP_SECRET
 from db import dbskiutc_con as db
@@ -26,7 +27,9 @@ class BotView():
             hash = hmac.new(APP_SECRET.encode('utf-8'), payload, hashlib.sha1).hexdigest()
             if hash != signature.split('=')[-1]:
                 raise Error('Not the same hash', 400)
-            return None
+
+            print(json.loads(payload))
+            return 'EVENT_RECEIVED'
         except Exception as e:
             print(e)
             return e
