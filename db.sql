@@ -119,3 +119,18 @@ CREATE TABLE IF NOT EXISTS `anim_key` (
   `level` int(10) NOT NULL,
   `next_indice` text
 );
+
+
+--
+-- Table structure for table `bot_users`
+--
+
+CREATE TABLE IF NOT EXISTS `bot_users` (
+  `fb_id` bigint PRIMARY KEY,
+  `login` varchar(40) DEFAULT NULL,
+  `token` varchar(30) DEFAULT NULL,
+  `last_action` DATETIME,
+  FOREIGN KEY (login)
+    REFERENCES `users_app`(login)
+    ON DELETE CASCADE
+);
