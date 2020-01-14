@@ -153,6 +153,34 @@ class UserView():
             self.con.rollback()
             return Error('Authentication error', 400).get_error()
 
+    def bot_account_verification(self, pwd):
+        """
+        check the login and pwd given to authenticate user
+        save en give a token
+        """
+        try:
+            with self.con:
+                cur = self.con.cursor(Model = User)
+                sql = "SELECT login, lastname, firstname, password FROM users_app WHERE login=%s and password=aes_encrypt(%s, %s)"
+                cur.execute(sql, (self.login, pwd, SALT))
+                user = cur.fetchone()
+
+                if user is None:
+                    return None
+                return user.to_json()
+
+        except Error as e:
+            return e.get_error()
+
+        except Exception as e:
+            print(e)
+            response.status = 400
+            return Error('Authentication error').get_error()
+
+        finally:
+            cur.close()
+            self.con.close()
+
     def change_avatar(self, data):
         try:
             with self.con:
@@ -349,7 +377,7 @@ class UserView():
                 for word in decoded_query:
                     if len(word):
                         words.append(word)
-                        
+
                 if not len(words):
                     return {}
                 words = '|'.join(words)

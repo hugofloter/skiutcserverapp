@@ -120,3 +120,27 @@ CREATE TABLE IF NOT EXISTS `anim_key` (
   `next_indice` text
 );
 
+
+--
+-- Table structure for table `bot_users`
+--
+
+CREATE TABLE IF NOT EXISTS `bot_users` (
+  `fb_id` bigint PRIMARY KEY,
+  `login` varchar(40) DEFAULT NULL,
+  `token` varchar(30) DEFAULT NULL,
+  `last_action` DATETIME,
+  FOREIGN KEY (login)
+    REFERENCES `users_app`(login)
+    ON DELETE CASCADE
+);
+
+
+--
+-- Table structure for table `bot_responses`
+--
+CREATE TABLE IF NOT EXISTS `bot_messages` (
+  `id` int PRIMARY KEY AUTO_INCREMENT,
+  `text` text NOT NULL,
+  `type` ENUM('image', 'text', 'new', 'other') DEFAULT 'text'
+);
