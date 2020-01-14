@@ -309,23 +309,29 @@ class GroupView():
     Set a new beer call to group
     :param id
     """
-    def new_beer_call(self, id_group):
+    def new_beer_call(self, id_group, data):
         try:
+            title = data.get('title')
+            text = data.get('message')
             new_beer_call = datetime.now()
+            last_beer_call = datetime.strptime(self.get_global(id_group).get('beer_call'), '%m-%d-%Y %H:%M:%S')
+            if last_beer_call:
+                time_diff = new_beer_call - last_beer_call
+                if time_diff.seconds < 3600:
+                    return Error('Not allowed to send notification, delay not great', 403).get_error()
             new_beer_call = new_beer_call.strftime('%Y-%m-%d %H:%M:%S')
             with self.con:
                 cur = self.con.cursor(Model = UserGroup)
                 sql = "UPDATE `groups` SET `beer_call` = %s WHERE id = %s"
                 cur.execute(sql, (new_beer_call, id_group))
                 self.con.commit()
-                group_name = self.get_global(id_group).get('name')
                 list_users = self.list_user_from_group(id_group)
                 login_list = []
                 for nb, user in list_users.items():
                     login_list.append(user.get('login'))
                 tokens = UserView().list_tokens_from_logins(login_list)
-                message = NotificationMessage({'title': 'La soif se fait attendre !',
-                                               'text': '{}, Ce groupe veut absolument boire un coup maintenant!'.format(group_name)})
+                message = NotificationMessage({'title': title,
+                                               'text': text})
                 NotificationsView(message, tokens).send_push_message()
 
                 return self.get(id_group)

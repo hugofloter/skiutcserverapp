@@ -64,6 +64,7 @@ def delete_group(id, user=None):
     except Exception as e:
         return e
 
+
 @put('/groups/<id>')
 @authenticate
 def update_group(id, user=None):
@@ -75,7 +76,7 @@ def update_group(id, user=None):
             invitation_type = data.get('invitation')
             return GroupView(login).handle_invitation(id, login, invitation_type)
         if data.get('beer_call'):
-            return GroupView(login).new_beer_call(id)
+            return GroupView(login).new_beer_call(id, data)
         if 'location_permission' in data:
             print('oui')
             permission = bool(data.get('location_permission'))
