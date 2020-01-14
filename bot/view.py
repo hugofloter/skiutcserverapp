@@ -180,7 +180,6 @@ class BotView():
 
     def basic_answer(self, sender_psid, type='text'):
         answer = self.get_message(random=True, type=type)
-        print('my answer :', answer)
         response = {
             "text": answer.get('text', 'oupsi je sais plus ce que je voulais dire')
         }
