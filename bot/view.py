@@ -254,10 +254,9 @@ class BotView():
 
                 message = cur.fetchone()
 
-                if message is None:
-                    raise Error('Not found', 404)
-
-                return message.to_json()
+                if message:
+                    return message.to_json()
+                return None
         except Exception as e:
             print(e)
             return e.get_error()
