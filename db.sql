@@ -134,3 +134,13 @@ CREATE TABLE IF NOT EXISTS `bot_users` (
     REFERENCES `users_app`(login)
     ON DELETE CASCADE
 );
+
+
+--
+-- Table structure for table `bot_responses`
+--
+CREATE TABLE IF NOT EXISTS `bot_messages` (
+  `id` int PRIMARY KEY AUTO_INCREMENT,
+  `text` text NOT NULL,
+  `type` ENUM('image', 'text', 'new', 'other') DEFAULT 'text'
+);

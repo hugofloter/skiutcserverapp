@@ -1,7 +1,7 @@
 import json
 
 from bottle import request, response, static_file
-from bottle import post, get
+from bottle import post, get, delete
 from utils.errors import Error
 from bot.view import BotView
 from utils.middlewares import admin
@@ -63,4 +63,46 @@ def get_verif_page(path=None):
 
     except Exception as e:
         print(e)
+        return e
+
+
+@get('/bot_messages')
+@admin
+def list_bot_messages(user=None):
+    try:
+        data = request.query
+        type = data.get('type')
+        return BotView().list_messages(type)
+    except Exception as e:
+        return e
+
+@get('/bot_messages/<id>')
+@admin
+def get_bot_message(id, user=None):
+    try:
+        return BotView().get_message(id)
+    except Exception as e:
+        return e
+
+@delete('/bot_messages/<id>')
+@admin
+def delete_bot_message(id, user=None):
+    try:
+        return BotView().delete_message(id)
+    except Exception as e:
+        return e
+
+@post('/bot_messages')
+@admin
+def create_bot_message(user=None):
+    try:
+        data = json.loads(request.body.read())
+        text = data.get('text')
+        type = data.get('type', 'text')
+
+        if not text:
+            return Error('no data', 400).get_error()
+        return BotView().add_message(text, type)
+
+    except Exception as e:
         return e

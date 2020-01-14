@@ -10,7 +10,7 @@ from datetime import datetime
 from time import strptime
 from db import dbskiutc_con as db
 from config import WEBHOOK_TOKEN, APP_SECRET, FB_MESSAGE_API, PAGE_TOKEN, API_URL
-from bot.model import BotUser
+from bot.model import BotUser, BotMessage
 from utils.errors import Error
 from user.view import UserView
 
@@ -107,7 +107,7 @@ class BotView():
             with self.con:
                 cur = self.con.cursor(Model = BotUser )
 
-                sql = "SELECT * FROM bot_users WHERE NOT login=%s AND login IS NOT NULL ORDER BY RAND() LIMIT 1"
+                sql = "SELECT * FROM bot_users WHERE login IS NOT NULL AND NOT login=%s  ORDER BY RAND() LIMIT 1"
                 cur.execute(sql, sender_psid)
                 user = cur.fetchone()
 
@@ -133,10 +133,7 @@ class BotView():
                     raise Error('Invalid token', 400)
 
                 user = self.get_user_by_login(login).to_json()
-                response = {
-                    "text": "Bien joué! Tu peux maintenant envoyer n'importe quelle photo (soit pas trop hardcore quand meme on te connait... :p ) et moi je m'occuperai de la balancer à un pote de Ski'UTC random!"
-                }
-                self.callSendAPI(user.get('fb_id'), response)
+                self.basic_answer(user.get('fb_id'), 'new')
 
                 return UserView(login).get().to_json()
 
@@ -150,82 +147,23 @@ class BotView():
         response = {}
 
         if user.get('token'):
-            response = {
-                "attachment": {
-                    "type": "template",
-                    "payload": {
-                        "template_type": "generic",
-                        "elements": [{
-                            "title": "Lie ton compte Ski'UTC",
-                            "subtitle": "Pour participer aux jeux, lie ton compte de l'appli Ski'UTC",
-                            "buttons": [{
-                                "type": "web_url",
-                                "url": f"{API_URL}/static?token={user['token']}",
-                                "webview_height_ratio": "full",
-                                "messenger_extensions": "false",
-                                "title": "Lier mon compte!",
-                            }]
-                        }]
-                    }
-                }
-            }
-            self.callSendAPI(sender_psid, response)
-            return None
+            return self.send_invitation(user['token'], sender_psid)
 
         if received_message.get('text'):
-            answers = [
-                f"Arrête avec tes '{received_message['text']}' et balance plutôt des dossiers",
-                "AH BAAAAN! ON LUI DIT PHOTO ET LE MEC IL ENVOIE PAS DES PHOTOOOOS!",
-                "stop spam ou je te bloque. envoie des photos si tu veux te rendre utile"
-            ]
-            response = {
-                "text": random.choice(answers)
-                }
+            return self.basic_answer(sender_psid)
 
-        elif received_message.get('attachments') and len(received_message['attachments']):
+        if received_message.get('attachments') and len(received_message['attachments']):
 
             type = received_message['attachments'][0]['type']
             payload = received_message['attachments'][0]['payload']
             if type == "image":
-                answers = [
-                    "Wowwh une photo!! Vas y je vais la faire tourner à un de tes potes!",
-                    "Oh la gueule que t'as! ca va tourner direct ça!",
-                    "MDR pas mal celle là! Encore un mec qui va rien comprendre quand il la verra...",
-                    "T'es sérieux? c'est ca ta photo? t'es pas influenceur sur insta toi... Bon allez je l'envoie mais hésite pas à t'améliorer"
-                ]
-
                 recipient = self.get_random_user(sender_psid).to_json().get('fb_id')
                 image = payload.get('url')
 
-                print(f"envoie de {image} a {recipient}")
                 self.send_image(recipient, image)
+                return self.basic_answer(sender_psid, 'image')
 
-                response = {
-                    "text": random.choice(answers)
-                }
-            elif type == "video":
-                answers = [
-                    "Eh t'as cru que je voulais voir ta sex-tape? envoie plutot des photos",
-                    "Tu fous quoi à balancer des vidéos?? ON VEUT DES PHOTAL",
-                    "T'es bourré toi! c'est de la photo que je veux! DU CUL DU CUL DU CUL"
-                ]
-                response = {
-                    "text": random.choice(answers)
-                }
-            else:
-                answers = [
-                    "Ptin je comprend meme pas ce que tu m'envoie comme truc!",
-                    "T'es bourré toi! moi je veux des photos!!"
-                ]
-                response = {
-                    "text": random.choice(answers)
-                }
-
-        else:
-            response = {
-                "text": "MDR j'ai rien compris à ce que tu voulais! t'es déjà bourré toi!"
-            }
-        self.callSendAPI(sender_psid, response)
+        return self.basic_answer(sender_psid, 'other')
 
     def send_image(self, recipient_psid, image_url):
         response = {
@@ -239,6 +177,36 @@ class BotView():
         }
 
         self.callSendAPI(recipient_psid, response)
+
+    def basic_answer(self, sender_psid, type='text'):
+        answer = self.get_message(random=True, type=type)
+        print('my answer :', answer)
+        response = {
+            "text": answer.get('text', 'oupsi je sais plus ce que je voulais dire')
+        }
+        self.callSendAPI(sender_psid, response)
+
+    def send_invitation(self, token, sender_psid):
+        response = {
+            "attachment": {
+                "type": "template",
+                "payload": {
+                    "template_type": "generic",
+                    "elements": [{
+                        "title": "Lie ton compte Ski'UTC",
+                        "subtitle": "Pour participer aux jeux, lie ton compte de l'appli Ski'UTC",
+                        "buttons": [{
+                            "type": "web_url",
+                            "url": f"{API_URL}/static?token={token}",
+                            "webview_height_ratio": "full",
+                            "messenger_extensions": "false",
+                            "title": "Lier mon compte!",
+                        }]
+                    }]
+                }
+            }
+        }
+        self.callSendAPI(sender_psid, response)
 
     def callSendAPI(self, sender_psid, response):
         request_body = {
@@ -254,3 +222,80 @@ class BotView():
             response = requests.post(FB_MESSAGE_API, json = request_body, params=params)
         except Exception as e:
             print(e)
+
+    def add_message(self, text, type = 'text'):
+        try:
+            with self.con:
+                cur = self.con.cursor(Model = BotMessage )
+                sql = "INSERT INTO bot_messages (text, type) VALUES (%s, %s)"
+                cur.execute(sql, (text, type))
+                self.con.commit()
+
+                sql = "SELECT * FROM bot_messages WHERE id = (SELECT MAX(id) FROM bot_messages)"
+                cur.execute(sql)
+
+                message = cur.fetchone()
+                return message.to_json()
+
+        except Exception as e:
+            print(e)
+            self.con.rollback()
+            return e
+
+    def get_message(self, id=None, random=False, type="text"):
+        try:
+            with self.con:
+                cur = self.con.cursor(Model = BotMessage )
+                if not random:
+                    sql = "SELECT * FROM bot_messages WHERE id=%s"
+                    cur.execute(sql, id)
+                else:
+                    sql = "SELECT * FROM bot_messages WHERE type=%s ORDER BY RAND() LIMIT 1"
+                    cur.execute(sql, type)
+
+                message = cur.fetchone()
+
+                if message is None:
+                    raise Error('Not found', 404)
+
+                return message.to_json()
+        except Exception as e:
+            print(e)
+            return e.get_error()
+
+    def delete_message(self, id):
+        try:
+            with self.con:
+                cur = self.con.cursor(Model = BotMessage)
+                sql = "DELETE FROM bot_messages WHERE id=%s"
+                cur.execute(sql, id)
+                self.con.commit()
+
+                return self.list_messages()
+
+        except Exception as e:
+            print(e)
+            self.con.rollback()
+            return e
+
+    def list_messages(self, type=None):
+        try:
+            with self.con:
+                cur = self.con.cursor(Model = BotMessage )
+
+                type_lookup = f"WHERE type='{type}'" if type else ""
+                sql = f"SELECT * FROM bot_messages {type_lookup}"
+                cur.execute(sql)
+
+                messages = cur.fetchall()
+
+                list = {}
+                count = 0
+                for message in messages:
+                    list[count] = message.to_json()
+                    count +=1
+
+                return list
+        except Exception as e:
+            print(e)
+            return e.get_error()

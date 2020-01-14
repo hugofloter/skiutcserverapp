@@ -12,3 +12,16 @@ class BotUser():
             "token": self.token,
             "last_action": self.last_action
         }
+
+class BotMessage():
+    def __init__(self, data):
+        self.id = data.get('id')
+        self.text = data.get('text')
+        self.type = data.get('type')
+
+    def to_json(self):
+        return {
+            "id": self.id,
+            "text": self.text,
+            "type": self.type
+        }
