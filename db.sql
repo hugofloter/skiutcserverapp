@@ -163,7 +163,7 @@ CREATE TABLE IF NOT EXISTS `bot_answer` (
   `response` text NOT NULL,
   `score` int default 0,
   FOREIGN KEY (id)
-    REFERENCES `game_question`(id)
+    REFERENCES `bot_question`(id)
     ON DELETE CASCADE
 );
 
@@ -176,9 +176,9 @@ CREATE TABLE IF NOT EXISTS `user_answer`(
     REFERENCES `users_app`(login)
     ON DELETE CASCADE,
   FOREIGN KEY (answer_id)
-    REFERENCES `bot_answer`(answer_id)
+    REFERENCES `bot_answer`(id)
     ON DELETE CASCADE,
   FOREIGN KEY (question_id)
-    REFERENCES `bot_question`(question_id)
+    REFERENCES `bot_question`(id)
     ON DELETE CASCADE
 );
