@@ -149,7 +149,11 @@ class BotView():
         if user.get('token'):
             return self.send_invitation(user['token'], sender_psid)
 
-        if received_message.get('text'):
+        message = received_message.get('text')
+
+        self.parse_question(message)
+
+        if message:
             return self.basic_answer(sender_psid)
 
         if received_message.get('attachments') and len(received_message['attachments']):
@@ -297,3 +301,22 @@ class BotView():
         except Exception as e:
             print(e)
             return e.get_error()
+
+    def parse_question(self, message):
+        if "créer question" in message:
+            array = message.split('\n')
+            array.pop(0)
+            question = array.pop(0).replace('+ ', '')
+
+            data = {
+                'question': question,
+                'answers': []
+            }
+
+            for response in array:
+                response = response.replace('- ','').split('::')
+                score = response[1] if len(response)==2 else 0
+                response = response[0]
+                data['answers'].append({ 'response': response, 'score': score })
+
+            return data
