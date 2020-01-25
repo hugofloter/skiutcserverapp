@@ -13,6 +13,7 @@ from config import WEBHOOK_TOKEN, APP_SECRET, FB_MESSAGE_API, PAGE_TOKEN, API_UR
 from bot.model import BotUser, BotMessage
 from utils.errors import Error
 from user.view import UserView
+from bot.utils import create_question
 
 class BotView():
     def __init__(self):
@@ -318,5 +319,9 @@ class BotView():
                 score = response[1] if len(response)==2 else 0
                 response = response[0]
                 data['answers'].append({ 'response': response, 'score': score })
-
-            return data
+            try:
+                #question = create_question(data)
+                print("hey")
+            except Exception as e:
+                print(e)
+                return True

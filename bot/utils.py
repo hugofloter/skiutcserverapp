@@ -1,5 +1,4 @@
 import json
-from bot.view import BotView
 from bot.model import BotQuestion, BotAnswer, UserAnswer
 from db import dbskiutc_con as db
 
@@ -16,12 +15,14 @@ def create_question(data):
             sql = "SELECT * FROM `bot_question` WHERE id = (SELECT MAX(id) FROM `bot_question`)"
             cur.execute(sql)
             question = cur.fetchone()
+            con.commit()
+
+            cur = con.cursor(Model=BotAnswer)
             for answer in answers:
-                cur = con.cursor(Model=BotAnswer)
                 score = answer.get('score')
                 response = answer.get('response')
-                sql = "INSERT INTO `bot_answer` (`question_id`, `response`, `score`) VALUES (%s)"
-                cur.execute(sql, (question.to_json.get('id'), response, score))
+                sql = "INSERT INTO `bot_answer` (`question_id`, `response`, `score`) VALUES (%s, %s, %s)"
+                cur.execute(sql, (question.to_json().get('id'), response, score))
             con.commit()
 
         return list_answers_from_question(question)
@@ -37,7 +38,7 @@ def list_answers_from_question(question):
     count = 0
     result = {}
     try:
-        id_question = question.to_json.get('id')
+        id_question = question.to_json().get('id')
         with con:
             cur = con.cursor(Model=BotAnswer)
             sql = "SELECT * FROM `bot_answer` WHERE `question_id` = %s"
