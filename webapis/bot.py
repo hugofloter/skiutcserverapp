@@ -7,19 +7,19 @@ from bot.view import BotView
 from utils.middlewares import admin
 from config import STATIC_FILES_SOURCE
 
+
 @post('/webhook')
 def messenger_post_message():
     try:
         payload = request.body.read()
         signature = request.headers.get('X-Hub-Signature')
 
-        if not payload or not signature:
-             return Error('Bad request', 400).get_error()
+        response.status = 200
+        BotView().validate_util_charge(payload, signature)
 
-        return BotView().validate_util_charge(payload, signature)
     except Exception as e:
-        print(e)
-        return Error('An error occured', 400).get_error()
+        response.status = 200
+
 
 @get('/webhook')
 def verification():
@@ -34,6 +34,7 @@ def verification():
     except Exception as e:
         return e
 
+
 @post('/link_account')
 def get_link_account():
     try:
@@ -47,6 +48,7 @@ def get_link_account():
     except Exception as e:
         return e
 
+
 @get('/static')
 def get_verif_page():
     try:
@@ -55,6 +57,7 @@ def get_verif_page():
     except Exception as e:
         print(e)
         return e
+
 
 @get('/static/<path:path>')
 def get_verif_page(path=None):
@@ -76,6 +79,7 @@ def list_bot_messages(user=None):
     except Exception as e:
         return e
 
+
 @get('/bot_messages/<id>')
 @admin
 def get_bot_message(id, user=None):
@@ -84,6 +88,7 @@ def get_bot_message(id, user=None):
     except Exception as e:
         return e
 
+
 @delete('/bot_messages/<id>')
 @admin
 def delete_bot_message(id, user=None):
@@ -91,6 +96,7 @@ def delete_bot_message(id, user=None):
         return BotView().delete_message(id)
     except Exception as e:
         return e
+
 
 @post('/bot_messages')
 @admin
