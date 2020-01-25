@@ -144,3 +144,41 @@ CREATE TABLE IF NOT EXISTS `bot_messages` (
   `text` text NOT NULL,
   `type` ENUM('image', 'text', 'new', 'other') DEFAULT 'text'
 );
+
+--
+-- Table structure for table `game_question`
+--
+CREATE TABLE IF NOT EXISTS `bot_question` (
+  `id` int PRIMARY KEY AUTO_INCREMENT,
+  `question` text NOT NULL,
+  `sent` BOOLEAN default 0
+);
+
+--
+-- Table structure for table `game_response`
+--
+CREATE TABLE IF NOT EXISTS `bot_answer` (
+  `id` int PRIMARY KEY AUTO_INCREMENT,
+  `question_id` int NOT NULL,
+  `response` text NOT NULL,
+  `score` int default 0,
+  FOREIGN KEY (id)
+    REFERENCES `game_question`(id)
+    ON DELETE CASCADE
+);
+
+
+CREATE TABLE IF NOT EXISTS `user_answer`(
+  `login` varchar(40)  NOT NULL,
+  `answer_id` int NOT NULL,
+  `question_id` int NOT NULL,
+  FOREIGN KEY (login)
+    REFERENCES `users_app`(login)
+    ON DELETE CASCADE,
+  FOREIGN KEY (answer_id)
+    REFERENCES `bot_answer`(answer_id)
+    ON DELETE CASCADE,
+  FOREIGN KEY (question_id)
+    REFERENCES `bot_question`(question_id)
+    ON DELETE CASCADE
+);
