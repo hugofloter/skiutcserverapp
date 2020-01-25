@@ -13,6 +13,7 @@ class BotUser():
             "last_action": self.last_action
         }
 
+
 class BotMessage():
     def __init__(self, data):
         self.id = data.get('id')
@@ -24,4 +25,48 @@ class BotMessage():
             "id": self.id,
             "text": self.text,
             "type": self.type
+        }
+
+
+class BotQuestion():
+    def __init__(self, data):
+        self.id = data.get('id')
+        self.question = data.get('question')
+        self.sent = data.get('sent')
+
+    def to_json(self):
+        return {
+            "id": self.id,
+            "question": self.question,
+            "sent": self.sent
+        }
+
+
+class BotAnswer():
+    def __init__(self, data):
+        self.id = data.get('id')
+        self.question_id = data.get('question_id')
+        self.answer = data.get('answer')
+        self.score = data.get('score')
+
+    def to_json(self):
+        return {
+            "id": self.id,
+            "question_id": self.question_id,
+            "answer": self.answer,
+            "score": self.score
+        }
+
+
+class UserAnswer():
+    def __init__(self, data):
+        self.login = data.get('login')
+        self.question_id = data.get('question_id')
+        self.answer_id = data.get('answer_id')
+
+    def to_json(self):
+        return {
+            "login": self.login,
+            "question_id": self.question_id,
+            "answer_id": self.answer_id
         }
