@@ -340,9 +340,7 @@ class BotView():
                 return False
 
     def send_question(self, sender_psid):
-        print('entrée')
         question = send_question()
-        print(question)
         if question is None:
             return
 
@@ -351,7 +349,8 @@ class BotView():
         answers = question.get('answers', [])
 
         buttons = []
-        for answer in answers:
+        for key in answers:
+            answer = answers[key]
             buttons.append({
                 "title": answer.get('response'),
                 "payload": f"{q_id},{answer.get('id')}",
