@@ -44,6 +44,7 @@ class BotView():
                 page = webhook_event.get('recipient').get('id')
                 timestamp = webhook_event.get('timestamp')
 
+                print(webhook_event.get('message'))
                 if webhook_event.get('message'):
                     self.handleMessage(sender, webhook_event.get('message'), timestamp, webhook_event.get('postback'))
 
@@ -142,7 +143,7 @@ class BotView():
             self.con.rollback()
             return e.get_error()
 
-    def handleMessage(self, sender_psid, received_message, timestamp, postback) :
+    def handleMessage(self, sender_psid, received_message, timestamp, postback):
 
         user = self.get_user(sender_psid, timestamp)
         response = {}
