@@ -44,6 +44,10 @@ def list_answers_from_question(question):
             sql = "SELECT * FROM `bot_answer` WHERE `question_id` = %s"
             cur.execute(sql, id_question)
             list_answers = cur.fetchall()
+            print('ici ==>', list_answers)
+            if not list_answers or not len(list_answers):
+                return question
+
             for answer in list_answers:
                 current = answer.to_json()
                 result[count] = current

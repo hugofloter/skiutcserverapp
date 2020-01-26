@@ -152,7 +152,7 @@ class BotView():
 
         message = received_message.get('text')
 
-        #self.parse_question(message)
+        self.parse_question(message)
 
         if message:
             return self.basic_answer(sender_psid)
@@ -302,6 +302,9 @@ class BotView():
             return e.get_error()
 
     def parse_question(self, message):
+        if message is None:
+            return
+
         if "créer question" in message:
             array = message.split('\n')
             array.pop(0)
@@ -318,8 +321,8 @@ class BotView():
                 response = response[0]
                 data['answers'].append({ 'response': response, 'score': score })
             try:
-                #question = create_question(data)
-                print("hey")
+                question = create_question(data)
+                print(question)
             except Exception as e:
                 print(e)
                 return True
