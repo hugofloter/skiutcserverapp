@@ -13,7 +13,7 @@ from config import WEBHOOK_TOKEN, APP_SECRET, FB_MESSAGE_API, PAGE_TOKEN, API_UR
 from bot.model import BotUser, BotMessage
 from utils.errors import Error
 from user.view import UserView
-from bot.utils import create_question
+from bot.utils import create_question, send_question
 
 class BotView():
     def __init__(self):
@@ -152,7 +152,11 @@ class BotView():
 
         message = received_message.get('text')
 
-        self.parse_question(message, sender_psid)
+        if self.parse_question(message, sender_psid):
+            return
+
+        if message == "question":
+            return self.send_question(sender_psid)
 
         if message:
             return self.basic_answer(sender_psid)
@@ -303,13 +307,13 @@ class BotView():
 
     def parse_question(self, message, sender_psid):
         if message is None:
-            return
+            return False
 
         if "créer question" in message:
             user = UserView().get_user_from_fb(sender_psid)
 
             if user is None or not user.to_json()['isAdmin']:
-                return
+                return True
             array = message.split('\n')
             array.pop(0)
             question = array.pop(0).replace('+ ', '')
@@ -330,6 +334,41 @@ class BotView():
                     "text": "Ta question a bien été enregistrée"
                 }
                 self.callSendAPI(sender_psid, response)
+                return True
             except Exception as e:
                 print(e)
-                return True
+                return False
+
+    def send_question(self, sender_psid):
+
+        question = send_question()
+
+        if question is None:
+            return
+
+        q = question.get('question')
+        q_id = question.get('id')
+        answers = question.get('answers', [])
+
+        buttons = []
+        for answer in answers:
+            buttons.append({
+                "title": answer.get('response'),
+                "payload": f"{q_id},{answer.get('id')}",
+                "type": "postback"
+            })
+
+        response = {
+            "attachment": {
+                "type": "template",
+                "payload": {
+                    "template_type": "generic",
+                    "elements": [{
+                        "title": q,
+                        "buttons": buttons
+                    }]
+                }
+            }
+        }
+
+        self.callSendAPI(sender_psid, response)

@@ -63,7 +63,19 @@ def list_answers_from_question(question):
 
 
 def send_question():
-    return None
+    con = db()
+    try:
+        cur = con.cursor(Model=BotQuestion)
+        sql = "SELECT * FROM bot_question WHERE sent=0 ORDER BY RAND() LIMIT 1"
+        cur.execute(sql)
+        question = cur.fetchone()
+
+        if question is None:
+            return None
+        return list_answers_from_question(question)
+
+    except Excetion as e:
+        print(e)
 
 def send_all_question():
     return None
