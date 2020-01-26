@@ -378,7 +378,7 @@ class BotView():
     def handle_postback(self, postback, sender_psid):
         if postback is None:
             return
-
+        print('POSTBACK')
         user = UserView().get_user_from_fb(sender_psid)
         user = user.to_json()
 
