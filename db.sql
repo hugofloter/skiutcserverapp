@@ -162,7 +162,7 @@ CREATE TABLE IF NOT EXISTS `bot_answer` (
   `question_id` int NOT NULL,
   `response` text NOT NULL,
   `score` int default 0,
-  FOREIGN KEY (id)
+  FOREIGN KEY (question_id)
     REFERENCES `bot_question`(id)
     ON DELETE CASCADE
 );

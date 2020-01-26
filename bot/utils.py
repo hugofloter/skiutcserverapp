@@ -20,7 +20,6 @@ def create_question(data):
             for answer in answers:
                 score = answer.get('score')
                 response = answer.get('response')
-                print(question.to_json().get('id'))
                 sql = "INSERT INTO `bot_answer` (`question_id`, `response`, `score`) VALUES (%s, %s, %s)"
                 cur.execute(sql, (int(question.to_json().get('id')), response, score))
             con.commit()
