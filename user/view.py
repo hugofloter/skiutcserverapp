@@ -368,6 +368,19 @@ class UserView():
                 response.status = 400
                 return Error('Problem happened in query list', 501).get_error()
 
+    def get_user_from_fb(self, user_id):
+        with self.con:
+            try:
+                cur = self.con.cursor(Model = User )
+                sql = "SELECT * FROM users_app INNER JOIN bot_users ON users_app.login = bot_users.login AND bot_users.fb_id=%s"
+                cur.execute(sql, user_id)
+
+                user = cur.fetchone()
+
+                return user
+            except Exception as e:
+                print(e)
+
     def autocomplete(self, query):
         try:
             with self.con:

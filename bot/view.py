@@ -152,7 +152,7 @@ class BotView():
 
         message = received_message.get('text')
 
-        self.parse_question(message)
+        self.parse_question(message, sender_psid)
 
         if message:
             return self.basic_answer(sender_psid)
@@ -301,11 +301,15 @@ class BotView():
             print(e)
             return e.get_error()
 
-    def parse_question(self, message):
+    def parse_question(self, message, sender_psid):
         if message is None:
             return
 
         if "créer question" in message:
+            user = UserView().get_user_from_fb(sender_psid)
+
+            if user is None or not user.to_json()['isAdmin']:
+                return
             array = message.split('\n')
             array.pop(0)
             question = array.pop(0).replace('+ ', '')
@@ -322,7 +326,10 @@ class BotView():
                 data['answers'].append({ 'response': response, 'score': score })
             try:
                 question = create_question(data)
-                print(question)
+                response = {
+                    "text": "Ta question a bien été enregistrée"
+                }
+                self.callSendAPI(sender_psid, response)
             except Exception as e:
                 print(e)
                 return True
