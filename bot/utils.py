@@ -107,6 +107,7 @@ def answers_stats(q_id):
                 'response': answer.get('response')
             }
         for answer in answers:
+            answer = answer.to_json()
             stats[answer.get('answer_id')]['stats'] = stats[answer.get('answer_id')].get('stats') + 1/lrngth
 
         return stats
