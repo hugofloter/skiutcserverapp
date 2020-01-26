@@ -46,14 +46,14 @@ class BotAnswer():
     def __init__(self, data):
         self.id = data.get('id')
         self.question_id = data.get('question_id')
-        self.answer = data.get('answer')
+        self.response = data.get('response')
         self.score = data.get('score')
 
     def to_json(self):
         return {
             "id": self.id,
             "question_id": self.question_id,
-            "answer": self.answer,
+            "response": self.response,
             "score": self.score
         }
 
