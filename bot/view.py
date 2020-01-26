@@ -13,7 +13,7 @@ from config import WEBHOOK_TOKEN, APP_SECRET, FB_MESSAGE_API, PAGE_TOKEN, API_UR
 from bot.model import BotUser, BotMessage
 from utils.errors import Error
 from user.view import UserView
-from bot.utils import create_question, send_question, add_answer, answers_stats
+from bot.utils import create_question, send_question, add_answer, answers_stats, list_question
 
 class BotView():
     def __init__(self):
@@ -156,7 +156,7 @@ class BotView():
         if self.parse_question(message, sender_psid):
             return
 
-        if  message and len(message) and "jouer" in message:
+        if message and len(message) and "jouer" in message.lower():
             return self.send_question(sender_psid)
 
         if message:
@@ -222,8 +222,6 @@ class BotView():
             },
             "message": response
         }
-
-
         params =  { "access_token": PAGE_TOKEN }
         try:
             response = requests.post(FB_MESSAGE_API, json = request_body, params=params)
@@ -373,6 +371,35 @@ class BotView():
 
         self.callSendAPI(sender_psid, response)
 
+    def send_stats(self, sender_psid):
+        questions = list_question()
+        if questions is None:
+            return
+
+        buttons = []
+        for key in questions:
+            question = questions[key]
+            buttons.append({
+                "title": question.get('question'),
+                "payload": f"@stats::{question.get('id')}",
+                "type": "postback"
+            })
+
+        response = {
+            "attachment": {
+                "type": "template",
+                "payload": {
+                    "template_type": "generic",
+                    "elements": [{
+                        "title": "Récupère les statistique pour une question !",
+                        "buttons": buttons
+                    }]
+                }
+            }
+        }
+
+        self.callSendAPI(sender_psid, response)
+
     def handle_postback(self, postback, sender_psid):
         if postback is None:
             return
@@ -399,13 +426,19 @@ class BotView():
             statssent = ""
             if stats:
                 for key in stats:
-                    statssent += f" - {stats[key].get('response')}: {stats[key].get('stats', 0)*100}% \n"
+                    statssent += f"- {stats[key].get('response')}: {stats[key].get('stats', 0)*100}% \n"
             response = {
-                    "text": f"Statistiques de la question : \n {statssent}"
+                    "text": f"Statistiques de la question : \n{statssent}"
             }
-            print(response)
             self.callSendAPI(sender_psid, response)
 
         if payload_type == "@stats":
             stats = answers_stats(value)
-            print(stats)
+            statssent = ""
+            if stats:
+                for key in stats:
+                    statssent += f"- {stats[key].get('response')}: {stats[key].get('stats', 0)*100}% \n"
+            response = {
+                    "text": f"Statistiques de la question : \n{statssent}"
+            }
+            self.callSendAPI(sender_psid, response)

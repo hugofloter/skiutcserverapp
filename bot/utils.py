@@ -68,8 +68,8 @@ def add_answer(data):
         q_id = data.get('q_id')
         login = data.get('login')
         cur = con.cursor(Model = UserAnswer)
-        sql = "SELECT * FROM user_answer WHERE login=%s AND answer_id=%s AND question_id=%s"
-        cur.execute(sql, (login, a_id, q_id))
+        sql = "SELECT * FROM user_answer WHERE login=%s AND question_id=%s"
+        cur.execute(sql, (login, q_id))
         user = cur.fetchone()
         if user:
             return None
@@ -136,6 +136,31 @@ def send_question():
 
     except Exception as e:
         print(e)
+
+
+def list_question():
+    con = db()
+    count = 0
+    result = {}
+    try:
+        with con:
+            cur = con.cursor(Model=BotQuestion)
+            sql = "SELECT * FROM `bot_question`"
+            cur.execute(sql)
+            list_q = cur.fetchall()
+            if not list_q or not len(list_q):
+                return None
+            for question in list_q:
+                current = question.to_json()
+                result[count] = current
+                count += 1
+            return result
+
+    except Exception as e:
+        print(e)
+        con.rollback()
+        return e
+
 
 def send_all_question():
     return None
