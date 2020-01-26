@@ -15,14 +15,14 @@ def create_question(data):
             sql = "SELECT * FROM `bot_question` WHERE id = (SELECT MAX(id) FROM `bot_question`)"
             cur.execute(sql)
             question = cur.fetchone()
-            con.commit()
 
             cur = con.cursor(Model=BotAnswer)
             for answer in answers:
                 score = answer.get('score')
                 response = answer.get('response')
+                print(question.to_json().get('id'))
                 sql = "INSERT INTO `bot_answer` (`question_id`, `response`, `score`) VALUES (%s, %s, %s)"
-                cur.execute(sql, (question.to_json().get('id'), response, score))
+                cur.execute(sql, (int(question.to_json().get('id')), response, score))
             con.commit()
 
         return list_answers_from_question(question)
