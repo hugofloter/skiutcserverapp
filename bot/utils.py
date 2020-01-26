@@ -101,7 +101,8 @@ def answers_stats(q_id):
         length = len(answers)
         stats = {}
 
-        for answer in list_answers:
+        for key in list_answers:
+            answer = list_answers[key]
             stats[answer.get('id')] = {
                 'response': answer.get('response')
             }
