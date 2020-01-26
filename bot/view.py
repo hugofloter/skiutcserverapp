@@ -160,6 +160,7 @@ class BotView():
             return self.send_question(sender_psid)
 
         if message and len(message) and ("stats" in message.lower() or "statistiques" in message.lower()):
+            print("stats !")
             return self.send_stats(sender_psid)
 
         if message:

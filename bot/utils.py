@@ -154,6 +154,7 @@ def list_question():
                 current = question.to_json()
                 result[count] = current
                 count += 1
+            print(result)
             return result
 
     except Exception as e:
