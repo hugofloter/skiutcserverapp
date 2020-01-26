@@ -160,7 +160,6 @@ class BotView():
             return self.send_question(sender_psid)
 
         if message and len(message) and ("stats" in message.lower() or "statistiques" in message.lower()):
-            print("stats !")
             return self.send_stats(sender_psid)
 
         if message:
@@ -377,7 +376,9 @@ class BotView():
 
     def send_stats(self, sender_psid):
         questions = list_question()
+        print(questions)
         if questions is None:
+            print("noneeee")
             return
 
         buttons = []
@@ -388,7 +389,7 @@ class BotView():
                 "payload": f"@stats::{question.get('id')}",
                 "type": "postback"
             })
-
+        print(buttons)
         response = {
             "attachment": {
                 "type": "template",
