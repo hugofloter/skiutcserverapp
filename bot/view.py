@@ -152,7 +152,7 @@ class BotView():
 
         message = received_message.get('text')
 
-        self.parse_question(message)
+        #self.parse_question(message)
 
         if message:
             return self.basic_answer(sender_psid)
@@ -174,7 +174,7 @@ class BotView():
             "attachment": {
                 "type": type,
                 "payload": {
-                    "url": image_url
+                    "url": url
                 }
             }
         }
