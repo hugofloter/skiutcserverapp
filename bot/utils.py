@@ -6,6 +6,7 @@ from db import dbskiutc_con as db
 def create_question(data):
     con = db()
     try:
+        print('data vaut: ', data)
         question = data.get('question')
         answers = data.get('answers')
         with con:
@@ -20,6 +21,8 @@ def create_question(data):
             for answer in answers:
                 score = answer.get('score')
                 response = answer.get('response')
+                print(response)
+                print(score)
                 sql = "INSERT INTO `bot_answer` (`question_id`, `response`, `score`) VALUES (%s, %s, %s)"
                 cur.execute(sql, (int(question.to_json().get('id')), response, score))
             con.commit()
