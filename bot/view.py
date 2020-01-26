@@ -225,8 +225,9 @@ class BotView():
             },
             "message": response
         }
-        params =  { "access_token": PAGE_TOKEN }
+        params = { "access_token": PAGE_TOKEN }
         try:
+            print(request_body)
             response = requests.post(FB_MESSAGE_API, json = request_body, params=params)
         except Exception as e:
             print(e)
@@ -371,14 +372,12 @@ class BotView():
                 }
             }
         }
-
+        print(sender_psid)
         self.callSendAPI(sender_psid, response)
 
     def send_stats(self, sender_psid):
         questions = list_question()
-        print(questions)
         if questions is None:
-            print("noneeee")
             return
 
         buttons = []
@@ -389,7 +388,7 @@ class BotView():
                 "payload": f"@stats::{question.get('id')}",
                 "type": "postback"
             })
-        print(buttons)
+
         response = {
             "attachment": {
                 "type": "template",
