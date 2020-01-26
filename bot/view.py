@@ -340,9 +340,9 @@ class BotView():
                 return False
 
     def send_question(self, sender_psid):
-
+        print('entrée')
         question = send_question()
-
+        print(question)
         if question is None:
             return
 
