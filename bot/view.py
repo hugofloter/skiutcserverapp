@@ -372,12 +372,12 @@ class BotView():
                 }
             }
         }
-        print(sender_psid)
         self.callSendAPI(sender_psid, response)
 
     def send_stats(self, sender_psid):
         questions = list_question()
         if questions is None:
+            print('ah non')
             return
 
         buttons = []
