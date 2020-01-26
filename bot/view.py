@@ -351,6 +351,7 @@ class BotView():
         buttons = []
         for key in answers:
             answer = answers[key]
+            print(answer)
             buttons.append({
                 "title": answer.get('response'),
                 "payload": f"{q_id},{answer.get('id')}",
