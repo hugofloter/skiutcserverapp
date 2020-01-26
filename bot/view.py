@@ -397,8 +397,9 @@ class BotView():
             stats = add_answer(data)
 
             statssent = ""
-            for key in stats:
-                statssent += f" - {stats[key].get('response')}: {stats[key].get('stats', 0)*100}% \n"
+            if stats:
+                for key in stats:
+                    statssent += f" - {stats[key].get('response')}: {stats[key].get('stats', 0)*100}% \n"
             response = {
                     "text": f"Statistiques de la question : \n {statssent}"
             }
