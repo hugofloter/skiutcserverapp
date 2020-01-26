@@ -13,7 +13,7 @@ from config import WEBHOOK_TOKEN, APP_SECRET, FB_MESSAGE_API, PAGE_TOKEN, API_UR
 from bot.model import BotUser, BotMessage
 from utils.errors import Error
 from user.view import UserView
-from bot.utils import create_question, send_question
+from bot.utils import create_question, send_question, add_answer, answers_stats
 
 class BotView():
     def __init__(self):
@@ -45,7 +45,7 @@ class BotView():
                 timestamp = webhook_event.get('timestamp')
 
                 if webhook_event.get('message'):
-                    self.handleMessage(sender, webhook_event.get('message'), timestamp)
+                    self.handleMessage(sender, webhook_event.get('message'), timestamp, webhook_event.get('postback'))
 
             return 'EVENT_RECEIVED'
         except Exception as e:
@@ -142,7 +142,7 @@ class BotView():
             self.con.rollback()
             return e.get_error()
 
-    def handleMessage(self, sender_psid, received_message, timestamp) :
+    def handleMessage(self, sender_psid, received_message, timestamp, postback) :
 
         user = self.get_user(sender_psid, timestamp)
         response = {}
@@ -155,8 +155,11 @@ class BotView():
         if self.parse_question(message, sender_psid):
             return
 
-        if message == "question":
+        if message == "jouer":
             return self.send_question(sender_psid)
+
+        if postback:
+            return self.handle_postback(postback, sender_psid)
 
         if message:
             return self.basic_answer(sender_psid)
@@ -351,10 +354,9 @@ class BotView():
         buttons = []
         for key in answers:
             answer = answers[key]
-            print(answer)
             buttons.append({
                 "title": answer.get('response'),
-                "payload": f"{q_id},{answer.get('id')}",
+                "payload": f"@question::{q_id},{answer.get('id')}",
                 "type": "postback"
             })
 
@@ -372,3 +374,27 @@ class BotView():
         }
 
         self.callSendAPI(sender_psid, response)
+
+    def handle_postback(self, postback, sender_psid):
+        if postback is None:
+            return
+
+        user = UserView().get_user_from_fb(sender_psid)
+        user = user.to_json()
+
+        payload = postback.get('payload')
+        payload = payload.split('::')
+
+        type = payload[0]
+        value = payload[1]
+
+        if type == "@question":
+            value = value.split(',')
+            q_id = value[0]
+            a_id = value[1]
+            stats = add_answer(q_id, a_id, user.get('login'))
+            print(stats)
+
+        if type == "@stats":
+            stats = answers_stats(value)
+            print(stats)

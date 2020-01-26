@@ -14,8 +14,6 @@ def messenger_post_message():
         payload = request.body.read()
         signature = request.headers.get('X-Hub-Signature')
 
-        print(payload)
-        
         response.status = 200
         BotView().validate_util_charge(payload, signature)
 

@@ -61,7 +61,57 @@ def list_answers_from_question(question):
         con.rollback()
         return e
 
+def add_answer(q_id, a_id, login):
+    con = db()
+    try:
+        cur = con.cursor(Model = UserAnswer)
+        sql = "SELECT * FROM user_answer WHERE login=%s AND  answer_id=%s AND question_id=%s"
+        cur.execute(sql, (login, a_id, q_id))
+        user = cur.fetchone()
+        if user:
+            return None
+        sql = "INSERT INTO user_answer (login, question_id, answer_id) VALUES (%s, %s, %s)"
+        cur.execute(sql, (login, q_id, a_id))
+        con.commit()
 
+        return answers_stats(q_id)
+    except Exception as e:
+        print(e)
+        con.rollback()
+
+def answers_stats(q_id):
+    con = db()
+    try:
+        cur = con.cursor(Model = BotQuestion)
+        sql = "SELECT * FROM bot_question WHERE id=%s"
+        cur.execute(sql, q_id)
+
+        question = cur.fetchone()
+        if question is None:
+            return None
+
+        list_answers = list_answers_from_question(question)
+        list_answers = list_answers.get('answers')
+
+        cur = con.cursor(Model = UserAnswer)
+        sql = "SELECT * FROM `user_answer` WHERE question_id=%s"
+        cur.execute(sql, q_id)
+
+        answers = cur.fetchall()
+        length = len(answers)
+        stats = {}
+
+        for answer in list_answers:
+            stats[answer.get('id')] = {
+                'response': answer.get('response')
+            }
+        for answer in answers:
+            stats[answer.get('answer_id')]['stats'] = stats[answer.get('answer_id')].get('stats') + 1/lrngth
+
+        return stats
+
+    except Exception as e:
+        print(e)
 def send_question():
     con = db()
     try:
