@@ -78,7 +78,7 @@ def add_answer(data):
         con.commit()
 
         return answers_stats(q_id)
-    
+
     except Exception as e:
         print(e)
         con.rollback()
@@ -114,7 +114,7 @@ def answers_stats(q_id):
 
         for answer in answers:
             answer = answer.to_json()
-            stats[answer.get('answer_id')]['stats'] = stats[answer.get('answer_id')].get('stats', 0) + 1/length
+            stats[answer.get('answer_id')]['stats'] = float(stats[answer.get('answer_id')].get('stats', 0) + 1/length)
 
         return stats
 
