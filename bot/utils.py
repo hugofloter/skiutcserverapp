@@ -37,13 +37,13 @@ def list_answers_from_question(question):
     count = 0
     result = {}
     try:
-        id_question = question.to_json().get('id')
+        question = question.to_json()
+        id_question = question.get('id')
         with con:
             cur = con.cursor(Model=BotAnswer)
             sql = "SELECT * FROM `bot_answer` WHERE `question_id` = %s"
             cur.execute(sql, id_question)
             list_answers = cur.fetchall()
-            print('ici ==>', list_answers)
             if not list_answers or not len(list_answers):
                 return question
 
