@@ -44,10 +44,10 @@ class BotView():
                 page = webhook_event.get('recipient').get('id')
                 timestamp = webhook_event.get('timestamp')
 
-                print(webhook_event.get('message'))
                 if webhook_event.get('message'):
-                    self.handleMessage(sender, webhook_event.get('message'), timestamp, webhook_event.get('postback'))
-
+                    self.handleMessage(sender, webhook_event.get('message'), timestamp)
+                if webhook_event.get('postback'):
+                    self.handle_postback(webhook_event.get('postback'), sender)
             return 'EVENT_RECEIVED'
         except Exception as e:
             print(e)
@@ -143,7 +143,7 @@ class BotView():
             self.con.rollback()
             return e.get_error()
 
-    def handleMessage(self, sender_psid, received_message, timestamp, postback):
+    def handleMessage(self, sender_psid, received_message, timestamp):
 
         user = self.get_user(sender_psid, timestamp)
         response = {}
@@ -158,9 +158,6 @@ class BotView():
 
         if message == "jouer":
             return self.send_question(sender_psid)
-
-        if postback:
-            return self.handle_postback(postback, sender_psid)
 
         if message:
             return self.basic_answer(sender_psid)
