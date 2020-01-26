@@ -114,7 +114,7 @@ def answers_stats(q_id):
 
         for answer in answers:
             answer = answer.to_json()
-            stats[answer.get('answer_id')]['stats'] = float(stats[answer.get('answer_id')].get('stats', 0) + 1/length)
+            stats[answer.get('answer_id')]['stats'] = round(float(stats[answer.get('answer_id')].get('stats', 0) + 1/length), 2)
 
         return stats
 

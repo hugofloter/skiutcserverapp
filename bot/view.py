@@ -376,7 +376,6 @@ class BotView():
     def handle_postback(self, postback, sender_psid):
         if postback is None:
             return
-        print('POSTBACK')
         user = UserView().get_user_from_fb(sender_psid)
         user = user.to_json()
 
@@ -396,7 +395,15 @@ class BotView():
                 'login': user.get('login')
             }
             stats = add_answer(data)
-            print(stats)
+
+            statssent = ""
+            for key in stats:
+                statssent += f" - {stats[key].get('response')}: {stats[key].get('stats', 0)*100}% \n"
+            response = {
+                    "text": f"Statistiques de la question : \n {statssent}"
+            }
+            print(response)
+            self.callSendAPI(sender_psid, response)
 
         if payload_type == "@stats":
             stats = answers_stats(value)
