@@ -6,7 +6,6 @@ from db import dbskiutc_con as db
 def create_question(data):
     con = db()
     try:
-        print('data vaut: ', data)
         question = data.get('question')
         answers = data.get('answers')
         with con:
@@ -61,11 +60,15 @@ def list_answers_from_question(question):
         con.rollback()
         return e
 
-def add_answer(q_id, a_id, login):
+
+def add_answer(data):
     con = db()
     try:
+        a_id = data.get('a_id')
+        q_id = data.get('q_id')
+        login = data.get('login')
         cur = con.cursor(Model = UserAnswer)
-        sql = "SELECT * FROM user_answer WHERE login=%s AND  answer_id=%s AND question_id=%s"
+        sql = "SELECT * FROM user_answer WHERE login=%s AND answer_id=%s AND question_id=%s"
         cur.execute(sql, (login, a_id, q_id))
         user = cur.fetchone()
         if user:
@@ -75,9 +78,11 @@ def add_answer(q_id, a_id, login):
         con.commit()
 
         return answers_stats(q_id)
+    
     except Exception as e:
         print(e)
         con.rollback()
+
 
 def answers_stats(q_id):
     con = db()
@@ -106,6 +111,7 @@ def answers_stats(q_id):
             stats[answer.get('id')] = {
                 'response': answer.get('response')
             }
+
         for answer in answers:
             answer = answer.to_json()
             stats[answer.get('answer_id')]['stats'] = stats[answer.get('answer_id')].get('stats', 0) + 1/length
@@ -114,6 +120,8 @@ def answers_stats(q_id):
 
     except Exception as e:
         print(e)
+
+
 def send_question():
     con = db()
     try:
@@ -126,7 +134,7 @@ def send_question():
             return None
         return list_answers_from_question(question)
 
-    except Excetion as e:
+    except Exception as e:
         print(e)
 
 def send_all_question():

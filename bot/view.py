@@ -156,7 +156,7 @@ class BotView():
         if self.parse_question(message, sender_psid):
             return
 
-        if message == "jouer":
+        if  message and len(message) and "jouer" in message:
             return self.send_question(sender_psid)
 
         if message:
@@ -383,16 +383,21 @@ class BotView():
         payload = postback.get('payload')
         payload = payload.split('::')
 
-        type = payload[0]
+        payload_type = payload[0]
         value = payload[1]
 
-        if type == "@question":
+        if payload_type == "@question":
             value = value.split(',')
             q_id = value[0]
             a_id = value[1]
-            stats = add_answer(q_id, a_id, user.get('login'))
+            data = {
+                'q_id': q_id,
+                'a_id': a_id,
+                'login': user.get('login')
+            }
+            stats = add_answer(data)
             print(stats)
 
-        if type == "@stats":
+        if payload_type == "@stats":
             stats = answers_stats(value)
             print(stats)
