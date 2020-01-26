@@ -159,6 +159,9 @@ class BotView():
         if message and len(message) and "jouer" in message.lower():
             return self.send_question(sender_psid)
 
+        if message and len(message) and ("stats" in message.lower() or "statistiques" in message.lower()):
+            return self.send_question(sender_psid)
+
         if message:
             return self.basic_answer(sender_psid)
 
