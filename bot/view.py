@@ -395,8 +395,7 @@ class BotView():
                 "payload": {
                     "template_type": "generic",
                     "elements": [{
-                        "title": "Récupère les statistique pour une question !",
-                        "buttons": buttons
+                        "title": "Récupère les statistique pour une question !"
                     }]
                 }
             }
