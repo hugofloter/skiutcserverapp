@@ -161,22 +161,20 @@ class BotView():
 
             type = received_message['attachments'][0]['type']
             payload = received_message['attachments'][0]['payload']
-            if type == "image":
-                recipient = self.get_random_user(sender_psid).to_json().get('fb_id')
-                image = payload.get('url')
 
-                self.send_image(recipient, image)
-                return self.basic_answer(sender_psid, 'image')
+            recipient = self.get_random_user(sender_psid).to_json().get('fb_id')
+            url = payload.get('url')
 
+            self.send_attachement(recipient, url, type)
+            return self.basic_answer(sender_psid, 'image')
         return self.basic_answer(sender_psid, 'other')
 
-    def send_image(self, recipient_psid, image_url):
+    def send_attachement(self, recipient_psid, url, type):
         response = {
             "attachment": {
-                "type": "image",
+                "type": type,
                 "payload": {
-                    "url": image_url,
-                    "is_reusable": "true"
+                    "url": image_url
                 }
             }
         }
