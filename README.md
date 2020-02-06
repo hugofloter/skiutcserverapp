@@ -1,7 +1,7 @@
 # Rest API of SKI'UTC application
 
 <p align="center">
-  <img width="460" height="300" src="https://raw.githubusercontent.com/ski-utc/skiutnativeapp/master/assets/images/logo.png">
+  <img width="400" height="150" src="https://raw.githubusercontent.com/ski-utc/skiutnativeapp/master/assets/images/logo.png">
 </p>
 
 This repository contains the rest API of the SKI'UTC application (https://github.com/ski-utc/skiutnativeapp)
