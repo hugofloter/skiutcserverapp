@@ -506,14 +506,8 @@ Operation on a specific group
 
 ## **Animation**
 
-Module that manipulates groups on the database
-
-- retrieval
-- creation
-- deletion
-- modification
-- send notification to group
-- allow location
+Module that manipulates animation. This animation is QRCode based and handle 9 different levels. Each level has an encoded key and his next_indice. 
+When you scan the code on the application, you unlock the level for the key you scanned and receive by mail the next indice for the next level.
 
 ### *Route : /v1/animation*
 
