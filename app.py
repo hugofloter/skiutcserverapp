@@ -1,7 +1,8 @@
-from bottle import run, get, hook, response, route, get, static_file
-from config import API_PORT
-from webapis import user, news, potin, group
-from config import IMAGES_SOURCE
+from bottle import run, get, hook, response, route, get, static_file, request
+from config import API_PORT, IMAGES_SOURCE
+from utils.middlewares import authenticate
+from webapis import user, news, potin, group, animation, bot
+
 
 @hook('after_request')
 def enableCORSGenericRoute():
@@ -14,6 +15,7 @@ def enableCORSGenericRoute():
 @route('/<path:path>', method='OPTIONS')
 def option_handler(path=None):
     return
+
 
 @get('/images/<path:path>')
 def get_image(path=None):

@@ -1,10 +1,10 @@
 class Group:
     def __init__(self, data):
-        self.id = data[0]
-        self.name = data[1]
-        self.owner = data[2]
-        if data[3]:
-            self.beer_call = data[3].strftime("%m-%d-%Y %H:%M:%S")
+        self.id = data.get('id')
+        self.name = data.get('name')
+        self.owner = data.get('owner')
+        if data.get('beer_call'):
+            self.beer_call = data.get('beer_call').strftime("%m-%d-%Y %H:%M:%S")
         else:
             self.beer_call = None
 
@@ -19,12 +19,12 @@ class Group:
 
 class UserGroup:
     def __init__(self, data):
-        self.login_user = data[0]
-        self.id_group = data[1]
-        self.status = data[2]
-        self.share_position = data[3]
-        if data[4]:
-            self.expiration_date = data[4].strftime("%m-%d-%Y %H:%M:%S")
+        self.login_user = data.get('login_user')
+        self.id_group = data.get('id_group')
+        self.status = data.get('status')
+        self.share_position = data.get('share_position')
+        if data.get('expiration_date'):
+            self.expiration_date = data.get('expiration_date').strftime("%m-%d-%Y %H:%M:%S")
         else:
             self.expiration_date = None
 

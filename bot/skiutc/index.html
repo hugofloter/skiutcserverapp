@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <link type="image/png" rel="icon" href="static/assets/icon.png" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <title>Ski'UTC</title>
+  </head>
+  <body>
+    <div class="container-fluid" style="margin-top: 20px">
+      <div class="row">
+        <div class="col align-self-center" style="text-align:center">
+          <img src="static/assets/logo.png" class="img-fluid">
+        </div>
+      </div>
+      <div class="row" style="margin-top:20px;">
+        <div class="col align-self-center" style="text-align:center">
+          <div id="alert" style="text-align:center;">
+
+          </div>
+        </div>
+      </div>
+      <div class="row" style="margin-top:20px;">
+        <div class="col align-self-center" style="text-align:center">
+          <div class="form-group" style="text-align: center; align-items:center;">
+            <input type="text" name="login" class="form-control" id="login" placeholder="login" style="max-width: 30%; display:inline;">
+          </div>
+          <div class="form-group" style="text-align: center; align-items:center;">
+            <input type="password" name="password" class="form-control" id="password" placeholder="password" style="max-width: 30%; display:inline;">
+          </div>
+          <button type="submit" class="btn btn-primary" onclick="fetchAPI();">Lier mon Compte</button>
+        </div>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+
+      function renderAlert(message, success = false) {
+        document.getElementById("alert").innerHTML = `<div class='alert alert-${success ? "success" : "danger"}' role='alert' style="max-width:50%; margin:0 auto;">${message}</div>`
+      }
+
+      function fetchAPI() {
+        const password = document.getElementById('password').value
+        const login = document.getElementById('login').value
+        const queryString = new URLSearchParams(window.location.search);
+
+        const token = queryString.get('token')
+        const API = window.location.origin + "/link_account"
+
+        if(login && login.length && password && password.length && token && token.length) {
+          data = JSON.stringify({
+            login,
+            password,
+            token
+          })
+
+          fetch(API, {
+            method: 'POST',
+            headers: {
+              'Content-Types': 'application/json'
+            },
+            body: data,
+          }).then((response) => {
+            response.json().then(
+              (data) => {
+                if(response.ok) {
+
+                  renderAlert(`Tu as bien relié ton compte facebook avec le Compte de ${data.login} \n Bienvenue ${data.firstname} ${data.lastname}, tu peux maintenant utiliser le bot Messenger`, true)
+                }
+                else {
+                  renderAlert(data.error , false)
+                }
+              }
+            ).catch((error) => { renderAlert(error , false)})
+
+          }).catch((error) => { renderAlert(error , false) });
+        }
+      }
+
+    </script>
+  </body>
+</html>

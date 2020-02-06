@@ -1,11 +1,11 @@
 class Potin():
     def __init__(self, data):
-        self.id = data[0]
-        self.title = data[1]
-        self.text = data[2]
-        self.approved = data[3]
-        self.sender = data[4]
-        self.isAnonymous = data[5]
+        self.id = data.get('id')
+        self.title = data.get('title')
+        self.text = data.get('text')
+        self.approved = data.get('approved')
+        self.sender = data.get('sender')
+        self.isAnonymous = data.get('isAnonymous')
 
     def to_json(self):
         return {
