@@ -68,7 +68,7 @@ Module that handle all user's operation (authentication, modification, upload, .
 #### Parameters
 
 | Parameter | Type| Mandatory  | Description |
-|---|---|---|---|---|---|
+|---|---|---|---|
 | login  | String | Yes | login of the user you want to connect |
 | password  | String | Yes | password of the user you want to connect |
 | token  | String | No | token to check whether user is already authenticated |
@@ -92,7 +92,7 @@ Get list of user object. Selection might be shrunk if query parameter is passed
 #### Parameters
 
 | Parameter | Type | Mandatory  | Description |
-|---|---|---|---|---|---|
+|---|---|---|---|
 | query  | String | No | query to get a thinner search on user list |
 
 #### Returns
@@ -114,7 +114,7 @@ You can change change user's information here :
 #### Parameters
 
 | Parameter | Type | Mandatory  | Description |
-|---|---|---|---|---|---|
+|---|---|---|---|
 | password  | String | No | old password |
 | new_password | String | No | new password |
 | location  | Object | No | new (latitude,longitude) couple coordinate |
@@ -133,7 +133,7 @@ You can change change user's information here :
 #### Parameters
 
 | Parameter | Type | Mandatory  | Description |
-|---|---|---|---|---|---|
+|---|---|---|---|
 | image  | Multipart File | Yes | image file to be the new profile picture of the user |
 
 #### Returns
@@ -177,7 +177,7 @@ Create a news, admin status is needed
 #### Parameters
 
 | Parameter | Type| Mandatory  | Description |
-|---|---|---|---|---|---|
+|---|---|---|---|
 | title  | String | Yes | title of the news |
 | text  | String | Yes | content of the news |
 
@@ -197,7 +197,7 @@ Get a specific news
 #### Parameters
 
 | Parameter | Type| Mandatory  | Description |
-|---|---|---|---|---|---|
+|---|---|---|---|
 | id  | Integer | Yes | id of the news |
 
 #### Returns
@@ -214,7 +214,7 @@ Delete a specific news, admin status id needed
 #### Parameters
 
 | Parameter | Type| Mandatory  | Description |
-|---|---|---|---|---|---|
+|---|---|---|---|
 | id  | Integer | Yes | id of the news |
 
 #### Returns
@@ -235,7 +235,7 @@ Add an image linked to a specific news, admin status id needed
 #### Parameters
 
 | Parameter | Type| Mandatory  | Description |
-|---|---|---|---|---|---|
+|---|---|---|---|
 | image  | Multipart File | Yes | image file to be the linked to the news |
 
 #### Returns
@@ -278,7 +278,7 @@ Create a potin
 #### Parameters
 
 | Parameter | Type| Mandatory  | Description |
-|---|---|---|---|---|---|
+|---|---|---|---|
 | title  | String | Yes | title of the potin |
 | text  | String | Yes | content of the potin |
 | isAnonymous  | boolean | Yes | if gossip is anonymous or not |
@@ -300,7 +300,7 @@ Get a specific valid potin
 #### Parameters
 
 | Parameter | Type| Mandatory  | Description |
-|---|---|---|---|---|---|
+|---|---|---|---|
 | id  | Integer | Yes | id of the potin |
 
 #### Returns
@@ -334,7 +334,7 @@ Delete a specific potin in await of validation, admin status is needed
 #### Parameters
 
 | Parameter | Type| Mandatory  | Description |
-|---|---|---|---|---|---|
+|---|---|---|---|
 | id  | Integer | Yes | id of the potin |
 
 #### Returns
@@ -353,7 +353,7 @@ Validate a specific potin that has not been yet accepted, admin status is needed
 #### Parameters
 
 | Parameter | Type| Mandatory  | Description |
-|---|---|---|---|---|---|
+|---|---|---|---|
 | id  | Integer | Yes | id of the potin |
 
 #### Returns
@@ -398,7 +398,7 @@ Create a group, and send notification to added users if they are
 #### Parameters
 
 | Parameter | Type| Mandatory  | Description |
-|---|---|---|---|---|---|
+|---|---|---|---|
 | name  | String | Yes | name of the group |
 | list_login  | Array | No | list of login to add to the group |
 
@@ -419,7 +419,7 @@ User must belong to the group
 #### Parameters
 
 | Parameter | Type| Mandatory  | Description |
-|---|---|---|---|---|---|
+|---|---|---|---|
 | id  | Integer | Yes | id of the group |
 
 #### Returns
@@ -445,7 +445,7 @@ User must be owner of this group
 #### Parameters
 
 | Parameter | Type| Mandatory  | Description |
-|---|---|---|---|---|---|
+|---|---|---|---|
 | id  | Integer | Yes | id of the group |
 
 #### Returns
@@ -469,7 +469,7 @@ Operation on a specific group
 #### Parameters
 
 | Parameter | Type| Mandatory  | Description |
-|---|---|---|---|---|---|
+|---|---|---|---|
 | id  | Integer | Yes | id of the potin |
 | invitation  | String | No | handle invitation of user (accept, reject) |
 | beer_call  | Boolean | No | send a specific notification to all user that belongs to the group |
@@ -528,7 +528,7 @@ Unlock a new level for the user
 #### Parameters
 
 | Parameter | Type| Mandatory  | Description |
-|---|---|---|---|---|---|
+|---|---|---|---|
 | key  | String | Yes | key of the animation to unlock new level |
 
 #### Returns
@@ -568,7 +568,7 @@ Verification of the token
 #### Parameters
 
 | Parameter | Type| Mandatory  | Description |
-|---|---|---|---|---|---|
+|---|---|---|---|
 | hub.verify_token  | String | Yes | token verification |
 | hub.challenge  | String | Yes | challenge |
 
@@ -596,7 +596,7 @@ messaging can be of type :
 #### Parameters
 
 | Parameter | Type| Mandatory  | Description |
-|---|---|---|---|---|---|
+|---|---|---|---|
 | payload  | Object | Yes | object received by fb api |
 
 #### Returns
@@ -612,7 +612,7 @@ messaging can be of type :
 #### Parameters
 
 | Parameter | Type| Mandatory  | Description |
-|---|---|---|---|---|---|
+|---|---|---|---|
 | login  | String | Yes | login of the user you want to connect |
 | password  | String | Yes | password of the user you want to connect |
 | token  | String | Yes | token to check whether user is already linked |
