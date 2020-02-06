@@ -1,5 +1,16 @@
 # Rest API of SKI'UTC application
+
+<p align="center">
+  <img width="460" height="300" src="https://raw.githubusercontent.com/ski-utc/skiutnativeapp/master/assets/images/logo.png">
+</p>
+
 This repository contains the rest API of the SKI'UTC application (https://github.com/ski-utc/skiutnativeapp)
+
+API using Python 3.6.8 and bottle.py
+
+<p align="center">
+  <img width="460" height="300" src="https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.toptal.com%2Fbottle%2Fbuilding-a-rest-api-with-bottle-framework&psig=AOvVaw314Q9v4xexTWVwz8eqvdG5&ust=1581094873743000&source=images&cd=vfe&ved=0CAIQjRxqFwoTCNCsj8WzvecCFQAAAAAdAAAAABAN">
+</p>
 
 Table of Contents
 =================
