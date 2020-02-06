@@ -9,7 +9,7 @@ This repository contains the rest API of the SKI'UTC application (https://github
 API using Python 3.6.8 and bottle.py
 
 <p align="center">
-  <img width="460" height="300" src="https://en.wikipedia.org/wiki/Bottle_(web_framework)#/media/File:Bottle-logo.svg">
+  <img width="460" height="300" src="https://bottlepy.org/docs/dev/_static/logo_nav.png">
 </p>
 
 Table of Contents
